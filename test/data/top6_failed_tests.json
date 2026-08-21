@@ -1,0 +1,80 @@
+[
+  {
+    "id": "soh_006",
+    "category": "grouping",
+    "question": "Find the number of orders handled by each SalesPersonID where SalesPersonID is not null.",
+    "expected_sql": "SELECT SalesPersonID, COUNT(*) AS OrderCount FROM Sales.SalesOrderHeader WHERE SalesPersonID IS NOT NULL GROUP BY SalesPersonID ORDER BY SalesPersonID;",
+    "evaluation": {
+      "key_columns": ["SalesPersonID"],
+      "value_columns": ["OrderCount"],
+      "expected_row_count": 17,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_012",
+    "category": "multiple_aggregates",
+    "question": "Calculate the count of distinct customers, total SubTotal, average SubTotal, minimum SubTotal, and maximum SubTotal for each year based on OrderDate.",
+    "expected_sql": "SELECT YEAR(OrderDate) AS OrderYear, COUNT(DISTINCT CustomerID) AS UniqueCustomers, SUM(SubTotal) AS TotalSubTotal, AVG(SubTotal) AS AvgSubTotal, MIN(SubTotal) AS MinSubTotal, MAX(SubTotal) AS MaxSubTotal FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate) ORDER BY OrderYear;",
+    "evaluation": {
+      "key_columns": ["OrderYear"],
+      "value_columns": ["UniqueCustomers", "TotalSubTotal", "AvgSubTotal", "MinSubTotal", "MaxSubTotal"],
+      "expected_row_count": 4,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_013",
+    "category": "group_by_having",
+    "question": "Find all customers who placed at least 5 orders and have an average TotalDue greater than 2000.",
+    "expected_sql": "SELECT CustomerID, COUNT(*) AS OrderCount, AVG(TotalDue) AS AvgTotalDue FROM Sales.SalesOrderHeader GROUP BY CustomerID HAVING COUNT(*) >= 5 AND AVG(TotalDue) > 2000 ORDER BY AvgTotalDue DESC;",
+    "evaluation": {
+      "key_columns": ["CustomerID"],
+      "value_columns": ["OrderCount", "AvgTotalDue"],
+      "expected_row_count": 258,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_014",
+    "category": "top_n_after_aggregation",
+    "question": "Find the top 5 customers by total SubTotal spending across all orders.",
+    "expected_sql": "SELECT TOP 5 CustomerID, SUM(SubTotal) AS TotalSpending FROM Sales.SalesOrderHeader GROUP BY CustomerID ORDER BY TotalSpending DESC;",
+    "evaluation": {
+      "key_columns": ["CustomerID"],
+      "value_columns": ["TotalSpending"],
+      "expected_row_count": 5,
+      "order_by": ["TotalSpending DESC"],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_015",
+    "category": "conditional_aggregation",
+    "question": "For each year, calculate total online sales (where OnlineOrderFlag = 1), total offline sales (where OnlineOrderFlag = 0), and total overall sales.",
+    "expected_sql": "SELECT YEAR(OrderDate) AS OrderYear, SUM(CASE WHEN OnlineOrderFlag = 1 THEN TotalDue ELSE 0 END) AS OnlineSales, SUM(CASE WHEN OnlineOrderFlag = 0 THEN TotalDue ELSE 0 END) AS OfflineSales, SUM(TotalDue) AS TotalSales FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate) ORDER BY OrderYear;",
+    "evaluation": {
+      "key_columns": ["OrderYear"],
+      "value_columns": ["OnlineSales", "OfflineSales", "TotalSales"],
+      "expected_row_count": 4,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_020",
+    "category": "multi_step_analytical_logic",
+    "question": "Show monthly sales, previous month's sales, and percentage change from the previous month based on OrderDate.",
+    "expected_sql": "WITH MonthlySales AS (SELECT YEAR(OrderDate) AS OrderYear, MONTH(OrderDate) AS OrderMonth, SUM(TotalDue) AS CurrentMonthSales FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate), MONTH(OrderDate)), MonthlyWithLag AS (SELECT OrderYear, OrderMonth, CurrentMonthSales, LAG(CurrentMonthSales) OVER (ORDER BY OrderYear, OrderMonth) AS PreviousMonthSales FROM MonthlySales) SELECT OrderYear, OrderMonth, CurrentMonthSales, PreviousMonthSales, (CurrentMonthSales - PreviousMonthSales) * 100.0 / NULLIF(PreviousMonthSales, 0) AS PctChange FROM MonthlyWithLag ORDER BY OrderYear, OrderMonth;",
+    "evaluation": {
+      "key_columns": ["OrderYear", "OrderMonth"],
+      "value_columns": ["CurrentMonthSales", "PreviousMonthSales", "PctChange"],
+      "expected_row_count": 38,
+      "order_by": ["OrderYear ASC", "OrderMonth ASC"],
+      "allow_extra_columns": true
+    }
+  }
+]

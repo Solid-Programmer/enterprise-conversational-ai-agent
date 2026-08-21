@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - QDRANT_URL=http://qdrant:6333
+      - PHOENIX_ENDPOINT=http://phoenix:6006/v1/traces
+    depends_on:
+      - qdrant
+      - phoenix
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports:
+      - "6006:6006"
+    environment:
+      - PHOENIX_WORKING_DIR=/mnt/data
+    volumes:
+      - phoenix_data:/mnt/data
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_PROXY_TARGET=http://backend:8000
+    depends_on:
+      - backend
+
+volumes:
+  qdrant_storage:
+  phoenix_data:

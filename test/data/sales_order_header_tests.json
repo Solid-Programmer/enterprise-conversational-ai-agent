@@ -1,0 +1,262 @@
+[
+  {
+    "id": "soh_001",
+    "category": "filtering",
+    "question": "Find the number of orders shipped on 7 June 2011.",
+    "expected_sql": "SELECT COUNT(*) AS OrderCount FROM Sales.SalesOrderHeader WHERE ShipDate = '2011-06-07';",
+    "evaluation": {
+      "key_columns": [],
+      "value_columns": ["OrderCount"],
+      "expected_row_count": 1,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_002",
+    "category": "filtering",
+    "question": "Get all sales order header records for CustomerID 29825.",
+    "expected_sql": "SELECT * FROM Sales.SalesOrderHeader WHERE CustomerID = 29825;",
+    "evaluation": {
+      "key_columns": ["SalesOrderID"],
+      "value_columns": ["CustomerID"],
+      "expected_row_count": 12,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_003",
+    "category": "aggregation",
+    "question": "What is the total revenue (sum of TotalDue) generated from online orders?",
+    "expected_sql": "SELECT SUM(TotalDue) AS TotalRevenue FROM Sales.SalesOrderHeader WHERE OnlineOrderFlag = 1;",
+    "evaluation": {
+      "key_columns": [],
+      "value_columns": ["TotalRevenue"],
+      "expected_row_count": 1,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_004",
+    "category": "aggregation",
+    "question": "Calculate the average Freight cost for orders with Status equal to 5.",
+    "expected_sql": "SELECT AVG(Freight) AS AvgFreight FROM Sales.SalesOrderHeader WHERE Status = 5;",
+    "evaluation": {
+      "key_columns": [],
+      "value_columns": ["AvgFreight"],
+      "expected_row_count": 1,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_005",
+    "category": "grouping",
+    "question": "Find the total sales amount (sum of TotalDue) and order count for each TerritoryID.",
+    "expected_sql": "SELECT TerritoryID, COUNT(*) AS OrderCount, SUM(TotalDue) AS TotalSales FROM Sales.SalesOrderHeader GROUP BY TerritoryID ORDER BY TerritoryID;",
+    "evaluation": {
+      "key_columns": ["TerritoryID"],
+      "value_columns": ["OrderCount", "TotalSales"],
+      "expected_row_count": 10,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_006",
+    "category": "grouping",
+    "question": "Find the number of orders handled by each SalesPersonID where SalesPersonID is not null.",
+    "expected_sql": "SELECT SalesPersonID, COUNT(*) AS OrderCount FROM Sales.SalesOrderHeader WHERE SalesPersonID IS NOT NULL GROUP BY SalesPersonID ORDER BY SalesPersonID;",
+    "evaluation": {
+      "key_columns": ["SalesPersonID"],
+      "value_columns": ["OrderCount"],
+      "expected_row_count": 17,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_007",
+    "category": "ranking",
+    "question": "Get the top 5 sales orders with the highest TotalDue.",
+    "expected_sql": "SELECT TOP 5 SalesOrderID, CustomerID, TotalDue FROM Sales.SalesOrderHeader ORDER BY TotalDue DESC;",
+    "evaluation": {
+      "key_columns": ["SalesOrderID"],
+      "value_columns": ["TotalDue"],
+      "expected_row_count": 5,
+      "order_by": ["TotalDue DESC"],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_008",
+    "category": "ranking",
+    "question": "Find the top 3 sales orders with the largest Freight charges placed in the year 2013.",
+    "expected_sql": "SELECT TOP 3 SalesOrderID, Freight FROM Sales.SalesOrderHeader WHERE YEAR(OrderDate) = 2013 ORDER BY Freight DESC;",
+    "evaluation": {
+      "key_columns": ["SalesOrderID"],
+      "value_columns": ["Freight"],
+      "expected_row_count": 3,
+      "order_by": ["Freight DESC"],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_009",
+    "category": "temporal",
+    "question": "Calculate the total SubTotal, TaxAmt, and Freight per year based on OrderDate.",
+    "expected_sql": "SELECT YEAR(OrderDate) AS OrderYear, SUM(SubTotal) AS TotalSubTotal, SUM(TaxAmt) AS TotalTax, SUM(Freight) AS TotalFreight FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate) ORDER BY OrderYear;",
+    "evaluation": {
+      "key_columns": ["OrderYear"],
+      "value_columns": ["TotalSubTotal", "TotalTax", "TotalFreight"],
+      "expected_row_count": 4,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_010",
+    "category": "temporal",
+    "question": "Find all sales orders where the shipping date was more than 7 days after the order date.",
+    "expected_sql": "SELECT SalesOrderID, OrderDate, ShipDate FROM Sales.SalesOrderHeader WHERE DATEDIFF(day, OrderDate, ShipDate) > 7;",
+    "evaluation": {
+      "key_columns": ["SalesOrderID"],
+      "value_columns": [],
+      "expected_row_count": 9,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_011",
+    "category": "complex_predicates",
+    "question": "Find the SalesOrderID, CustomerID, TotalDue, TerritoryID, and SalesPersonID for all sales orders placed in 2013 with TotalDue between 1000 and 5000, excluding orders where SalesPersonID is null or TerritoryID is in (1, 2, 3).",
+    "expected_sql": "SELECT SalesOrderID, CustomerID, TotalDue, TerritoryID, SalesPersonID FROM Sales.SalesOrderHeader WHERE YEAR(OrderDate) = 2013 AND TotalDue BETWEEN 1000 AND 5000 AND SalesPersonID IS NOT NULL AND TerritoryID NOT IN (1, 2, 3);",
+    "evaluation": {
+      "key_columns": ["SalesOrderID"],
+      "value_columns": ["CustomerID", "TotalDue", "TerritoryID", "SalesPersonID"],
+      "expected_row_count": 242,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_012",
+    "category": "multiple_aggregates",
+    "question": "Calculate the count of distinct customers, total SubTotal, average SubTotal, minimum SubTotal, and maximum SubTotal for each year based on OrderDate.",
+    "expected_sql": "SELECT YEAR(OrderDate) AS OrderYear, COUNT(DISTINCT CustomerID) AS UniqueCustomers, SUM(SubTotal) AS TotalSubTotal, AVG(SubTotal) AS AvgSubTotal, MIN(SubTotal) AS MinSubTotal, MAX(SubTotal) AS MaxSubTotal FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate) ORDER BY OrderYear;",
+    "evaluation": {
+      "key_columns": ["OrderYear"],
+      "value_columns": ["UniqueCustomers", "TotalSubTotal", "AvgSubTotal", "MinSubTotal", "MaxSubTotal"],
+      "expected_row_count": 4,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_013",
+    "category": "group_by_having",
+    "question": "Find all customers, showing their CustomerID, order count, and average TotalDue, who placed at least 5 orders and have an average TotalDue greater than 2000.",
+    "expected_sql": "SELECT CustomerID, COUNT(*) AS OrderCount, AVG(TotalDue) AS AvgTotalDue FROM Sales.SalesOrderHeader GROUP BY CustomerID HAVING COUNT(*) >= 5 AND AVG(TotalDue) > 2000 ORDER BY AvgTotalDue DESC;",
+    "evaluation": {
+      "key_columns": ["CustomerID"],
+      "value_columns": ["OrderCount", "AvgTotalDue"],
+      "expected_row_count": 258,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_014",
+    "category": "top_n_after_aggregation",
+    "question": "Find the top 5 customers by total SubTotal spending across all orders.",
+    "expected_sql": "SELECT TOP 5 CustomerID, SUM(SubTotal) AS TotalSpending FROM Sales.SalesOrderHeader GROUP BY CustomerID ORDER BY TotalSpending DESC;",
+    "evaluation": {
+      "key_columns": ["CustomerID"],
+      "value_columns": ["TotalSpending"],
+      "expected_row_count": 5,
+      "order_by": ["TotalSpending DESC"],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_015",
+    "category": "conditional_aggregation",
+    "question": "For each year, calculate total online sales (where OnlineOrderFlag = 1), total offline sales (where OnlineOrderFlag = 0), and total overall sales.",
+    "expected_sql": "SELECT YEAR(OrderDate) AS OrderYear, SUM(CASE WHEN OnlineOrderFlag = 1 THEN TotalDue ELSE 0 END) AS OnlineSales, SUM(CASE WHEN OnlineOrderFlag = 0 THEN TotalDue ELSE 0 END) AS OfflineSales, SUM(TotalDue) AS TotalSales FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate) ORDER BY OrderYear;",
+    "evaluation": {
+      "key_columns": ["OrderYear"],
+      "value_columns": ["OnlineSales", "OfflineSales", "TotalSales"],
+      "expected_row_count": 4,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_016",
+    "category": "ratios_percentages",
+    "question": "For each territory, calculate the percentage of total sales generated by online orders and return territories where the online sales percentage exceeds 60%.",
+    "expected_sql": "SELECT TerritoryID, SUM(CASE WHEN OnlineOrderFlag = 1 THEN TotalDue ELSE 0 END) * 100.0 / NULLIF(SUM(TotalDue), 0) AS OnlineSalesPercentage FROM Sales.SalesOrderHeader GROUP BY TerritoryID HAVING (SUM(CASE WHEN OnlineOrderFlag = 1 THEN TotalDue ELSE 0 END) * 100.0 / NULLIF(SUM(TotalDue), 0)) > 60.0 ORDER BY OnlineSalesPercentage DESC;",
+    "evaluation": {
+      "key_columns": ["TerritoryID"],
+      "value_columns": ["OnlineSalesPercentage"],
+      "expected_row_count": 1,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_017",
+    "category": "date_intelligence",
+    "question": "Find the total sales (sum of TotalDue) and average shipping delay in days (DATEDIFF between OrderDate and ShipDate) grouped by order year and quarter.",
+    "expected_sql": "SELECT YEAR(OrderDate) AS OrderYear, DATEPART(quarter, OrderDate) AS OrderQuarter, SUM(TotalDue) AS TotalSales, AVG(DATEDIFF(day, OrderDate, ShipDate)) AS AvgShippingDelayDays FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate), DATEPART(quarter, OrderDate) ORDER BY OrderYear, OrderQuarter;",
+    "evaluation": {
+      "key_columns": ["OrderYear", "OrderQuarter"],
+      "value_columns": ["TotalSales", "AvgShippingDelayDays"],
+      "expected_row_count": 13,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_018",
+    "category": "subqueries_ctes",
+    "question": "Find all sales orders whose TotalDue is greater than the overall average TotalDue of all sales orders.",
+    "expected_sql": "SELECT SalesOrderID, CustomerID, TotalDue FROM Sales.SalesOrderHeader WHERE TotalDue > (SELECT AVG(TotalDue) FROM Sales.SalesOrderHeader) ORDER BY TotalDue DESC;",
+    "evaluation": {
+      "key_columns": ["SalesOrderID"],
+      "value_columns": ["TotalDue"],
+      "expected_row_count": 4012,
+      "order_by": [],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_019",
+    "category": "window_functions",
+    "question": "For each year, rank all months by total SubTotal spending using the RANK window function.",
+    "expected_sql": "WITH MonthlySales AS (SELECT YEAR(OrderDate) AS OrderYear, MONTH(OrderDate) AS OrderMonth, SUM(SubTotal) AS MonthlySubTotal FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate), MONTH(OrderDate)) SELECT OrderYear, OrderMonth, MonthlySubTotal, RANK() OVER (PARTITION BY OrderYear ORDER BY MonthlySubTotal DESC) AS MonthRank FROM MonthlySales ORDER BY OrderYear, MonthRank;",
+    "evaluation": {
+      "key_columns": ["OrderYear", "OrderMonth"],
+      "value_columns": ["MonthlySubTotal", "MonthRank"],
+      "expected_row_count": 38,
+      "order_by": ["OrderYear ASC", "MonthRank ASC"],
+      "allow_extra_columns": true
+    }
+  },
+  {
+    "id": "soh_020",
+    "category": "multi_step_analytical_logic",
+    "question": "Show monthly sales, previous month's sales, and percentage change from the previous month based on OrderDate.",
+    "expected_sql": "WITH MonthlySales AS (SELECT YEAR(OrderDate) AS OrderYear, MONTH(OrderDate) AS OrderMonth, SUM(TotalDue) AS CurrentMonthSales FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate), MONTH(OrderDate)), MonthlyWithLag AS (SELECT OrderYear, OrderMonth, CurrentMonthSales, LAG(CurrentMonthSales) OVER (ORDER BY OrderYear, OrderMonth) AS PreviousMonthSales FROM MonthlySales) SELECT OrderYear, OrderMonth, CurrentMonthSales, PreviousMonthSales, (CurrentMonthSales - PreviousMonthSales) * 100.0 / NULLIF(PreviousMonthSales, 0) AS PctChange FROM MonthlyWithLag ORDER BY OrderYear, OrderMonth;",
+    "evaluation": {
+      "key_columns": ["OrderYear", "OrderMonth"],
+      "value_columns": ["CurrentMonthSales", "PreviousMonthSales", "PctChange"],
+      "expected_row_count": 38,
+      "order_by": ["OrderYear ASC", "OrderMonth ASC"],
+      "allow_extra_columns": true
+    }
+  }
+]

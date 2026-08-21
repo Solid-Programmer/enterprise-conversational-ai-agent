@@ -1,0 +1,2668 @@
+[
+  {
+    "id": "vq_001",
+    "question": "Find the total revenue (sum of SubTotal) generated across all sales orders.",
+    "sql": "SELECT SUM(SubTotal) AS TotalRevenue FROM Sales.SalesOrderHeader;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SubTotal"
+    ],
+    "concepts": [
+      "aggregation",
+      "revenue"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_002",
+    "question": "Get all sales order details for SalesOrderID 43659.",
+    "sql": "SELECT SalesOrderID, SalesOrderDetailID, ProductID, OrderQty, UnitPrice, LineTotal FROM Sales.SalesOrderDetail WHERE SalesOrderID = 43659;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SalesOrderID",
+      "Sales.SalesOrderDetail.SalesOrderDetailID",
+      "Sales.SalesOrderDetail.ProductID",
+      "Sales.SalesOrderDetail.OrderQty",
+      "Sales.SalesOrderDetail.UnitPrice",
+      "Sales.SalesOrderDetail.LineTotal"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_003",
+    "question": "Find the total freight charges collected for sales orders placed in 2013.",
+    "sql": "SELECT SUM(Freight) AS TotalFreight FROM Sales.SalesOrderHeader WHERE YEAR(OrderDate) = 2013;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.Freight",
+      "Sales.SalesOrderHeader.OrderDate"
+    ],
+    "concepts": [
+      "aggregation",
+      "temporal",
+      "freight"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_004",
+    "question": "List the top 10 sales orders with the highest total amount due.",
+    "sql": "SELECT TOP 10 SalesOrderID, CustomerID, TotalDue FROM Sales.SalesOrderHeader ORDER BY TotalDue DESC;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.CustomerID",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_005",
+    "question": "Find the total quantity of products sold (sum of OrderQty) for ProductID 776.",
+    "sql": "SELECT SUM(OrderQty) AS TotalUnitsSold FROM Sales.SalesOrderDetail WHERE ProductID = 776;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.OrderQty",
+      "Sales.SalesOrderDetail.ProductID"
+    ],
+    "concepts": [
+      "aggregation",
+      "units_sold"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_006",
+    "question": "Find the number of online orders vs offline orders placed in the database.",
+    "sql": "SELECT OnlineOrderFlag, COUNT(*) AS OrderCount FROM Sales.SalesOrderHeader GROUP BY OnlineOrderFlag;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.OnlineOrderFlag"
+    ],
+    "concepts": [
+      "grouping"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_007",
+    "question": "Calculate total revenue and average order value for each year based on OrderDate.",
+    "sql": "SELECT YEAR(OrderDate) AS OrderYear, SUM(SubTotal) AS TotalRevenue, AVG(SubTotal) AS AvgOrderValue FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate) ORDER BY OrderYear;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.OrderDate",
+      "Sales.SalesOrderHeader.SubTotal"
+    ],
+    "concepts": [
+      "grouping",
+      "temporal",
+      "revenue"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_008",
+    "question": "Find all sales orders where ShipDate was more than 5 days after OrderDate.",
+    "sql": "SELECT SalesOrderID, OrderDate, ShipDate, DATEDIFF(day, OrderDate, ShipDate) AS ShippingDelay FROM Sales.SalesOrderHeader WHERE DATEDIFF(day, OrderDate, ShipDate) > 5;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.OrderDate",
+      "Sales.SalesOrderHeader.ShipDate"
+    ],
+    "concepts": [
+      "temporal",
+      "filtering"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_009",
+    "question": "Get the top 5 product line items with the highest LineTotal in SalesOrderDetail.",
+    "sql": "SELECT TOP 5 SalesOrderID, SalesOrderDetailID, ProductID, LineTotal FROM Sales.SalesOrderDetail ORDER BY LineTotal DESC;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SalesOrderID",
+      "Sales.SalesOrderDetail.SalesOrderDetailID",
+      "Sales.SalesOrderDetail.ProductID",
+      "Sales.SalesOrderDetail.LineTotal"
+    ],
+    "concepts": [
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_010",
+    "question": "Calculate the average UnitPriceDiscount applied on line items per SpecialOfferID.",
+    "sql": "SELECT SpecialOfferID, AVG(UnitPriceDiscount) AS AvgDiscountRate FROM Sales.SalesOrderDetail GROUP BY SpecialOfferID ORDER BY SpecialOfferID;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SpecialOfferID",
+      "Sales.SalesOrderDetail.UnitPriceDiscount"
+    ],
+    "concepts": [
+      "grouping",
+      "ratios"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_011",
+    "question": "Find total revenue and total line items sold for each order placed by CustomerID 29825.",
+    "sql": "SELECT h.SalesOrderID, h.OrderDate, h.SubTotal, COUNT(d.SalesOrderDetailID) AS LineItemCount FROM Sales.SalesOrderHeader h JOIN Sales.SalesOrderDetail d ON h.SalesOrderID = d.SalesOrderID WHERE h.CustomerID = 29825 GROUP BY h.SalesOrderID, h.OrderDate, h.SubTotal ORDER BY h.OrderDate;",
+    "tables": [
+      "Sales.SalesOrderHeader",
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.OrderDate",
+      "Sales.SalesOrderHeader.SubTotal",
+      "Sales.SalesOrderHeader.CustomerID",
+      "Sales.SalesOrderDetail.SalesOrderDetailID"
+    ],
+    "concepts": [
+      "two-table join",
+      "grouping"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_012",
+    "question": "Calculate total tax collected and total freight for each order status code.",
+    "sql": "SELECT Status, SUM(TaxAmt) AS TotalTax, SUM(Freight) AS TotalFreight FROM Sales.SalesOrderHeader GROUP BY Status ORDER BY Status;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.Status",
+      "Sales.SalesOrderHeader.TaxAmt",
+      "Sales.SalesOrderHeader.Freight"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_013",
+    "question": "Find the total quantity sold and total revenue for ProductID 776 by joining header and detail.",
+    "sql": "SELECT d.ProductID, SUM(d.OrderQty) AS TotalUnitsSold, SUM(d.LineTotal) AS TotalLineRevenue FROM Sales.SalesOrderDetail d JOIN Sales.SalesOrderHeader h ON d.SalesOrderID = h.SalesOrderID WHERE d.ProductID = 776 GROUP BY d.ProductID;",
+    "tables": [
+      "Sales.SalesOrderDetail",
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.ProductID",
+      "Sales.SalesOrderDetail.OrderQty",
+      "Sales.SalesOrderDetail.LineTotal",
+      "Sales.SalesOrderHeader.SalesOrderID"
+    ],
+    "concepts": [
+      "two-table join",
+      "aggregation"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_014",
+    "question": "Find orders placed in 2012 where TotalDue exceeded 50000.",
+    "sql": "SELECT SalesOrderID, CustomerID, OrderDate, TotalDue FROM Sales.SalesOrderHeader WHERE YEAR(OrderDate) = 2012 AND TotalDue > 50000;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.CustomerID",
+      "Sales.SalesOrderHeader.OrderDate",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_015",
+    "question": "Count how many sales orders have CarrierTrackingNumber recorded in line details.",
+    "sql": "SELECT COUNT(DISTINCT SalesOrderID) AS TrackedOrdersCount FROM Sales.SalesOrderDetail WHERE CarrierTrackingNumber IS NOT NULL;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SalesOrderID",
+      "Sales.SalesOrderDetail.CarrierTrackingNumber"
+    ],
+    "concepts": [
+      "aggregation",
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_016",
+    "question": "Calculate the percentage of total due contributed by tax and freight for order 43659.",
+    "sql": "SELECT SalesOrderID, SubTotal, TaxAmt, Freight, TotalDue, (TaxAmt * 100.0 / NULLIF(TotalDue, 0)) AS TaxPct, (Freight * 100.0 / NULLIF(TotalDue, 0)) AS FreightPct FROM Sales.SalesOrderHeader WHERE SalesOrderID = 43659;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.SubTotal",
+      "Sales.SalesOrderHeader.TaxAmt",
+      "Sales.SalesOrderHeader.Freight",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "ratios",
+      "filtering"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_017",
+    "question": "Find the average order quantity per product line item across all sales order details.",
+    "sql": "SELECT AVG(CAST(OrderQty AS float)) AS AvgOrderQty FROM Sales.SalesOrderDetail;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.OrderQty"
+    ],
+    "concepts": [
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_018",
+    "question": "Find total online sales vs offline sales per quarter for 2013.",
+    "sql": "SELECT DATEPART(quarter, OrderDate) AS Quarter, SUM(CASE WHEN OnlineOrderFlag = 1 THEN TotalDue ELSE 0 END) AS OnlineSales, SUM(CASE WHEN OnlineOrderFlag = 0 THEN TotalDue ELSE 0 END) AS OfflineSales FROM Sales.SalesOrderHeader WHERE YEAR(OrderDate) = 2013 GROUP BY DATEPART(quarter, OrderDate) ORDER BY Quarter;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.OrderDate",
+      "Sales.SalesOrderHeader.OnlineOrderFlag",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "conditional aggregation",
+      "temporal",
+      "grouping"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_019",
+    "question": "Find sales orders with more than 10 product line items.",
+    "sql": "SELECT SalesOrderID, COUNT(*) AS LineCount FROM Sales.SalesOrderDetail GROUP BY SalesOrderID HAVING COUNT(*) > 10 ORDER BY LineCount DESC;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SalesOrderID"
+    ],
+    "concepts": [
+      "grouping",
+      "HAVING"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_020",
+    "question": "Find the maximum and minimum unit price sold for each ProductID in SalesOrderDetail.",
+    "sql": "SELECT ProductID, MIN(UnitPrice) AS MinPrice, MAX(UnitPrice) AS MaxPrice FROM Sales.SalesOrderDetail GROUP BY ProductID ORDER BY ProductID;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.ProductID",
+      "Sales.SalesOrderDetail.UnitPrice"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_021",
+    "question": "Count total customers registered in each territory.",
+    "sql": "SELECT TerritoryID, COUNT(*) AS CustomerCount FROM Sales.Customer GROUP BY TerritoryID ORDER BY TerritoryID;",
+    "tables": [
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Customer.TerritoryID",
+      "Sales.Customer.CustomerID"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_022",
+    "question": "Find all customers associated with a store account (where StoreID is not null).",
+    "sql": "SELECT CustomerID, StoreID, TerritoryID, AccountNumber FROM Sales.Customer WHERE StoreID IS NOT NULL;",
+    "tables": [
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.Customer.StoreID",
+      "Sales.Customer.TerritoryID",
+      "Sales.Customer.AccountNumber"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_023",
+    "question": "List store name and salesperson ID for all store accounts.",
+    "sql": "SELECT BusinessEntityID, Name, SalesPersonID FROM Sales.Store WHERE SalesPersonID IS NOT NULL;",
+    "tables": [
+      "Sales.Store"
+    ],
+    "columns": [
+      "Sales.Store.BusinessEntityID",
+      "Sales.Store.Name",
+      "Sales.Store.SalesPersonID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_024",
+    "question": "Find the top 10 customers with the highest total SubTotal order spending.",
+    "sql": "SELECT TOP 10 c.CustomerID, SUM(h.SubTotal) AS TotalSpent FROM Sales.Customer c JOIN Sales.SalesOrderHeader h ON c.CustomerID = h.CustomerID GROUP BY c.CustomerID ORDER BY TotalSpent DESC;",
+    "tables": [
+      "Sales.Customer",
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.SalesOrderHeader.SubTotal"
+    ],
+    "concepts": [
+      "two-table join",
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_025",
+    "question": "Count the number of orders placed by each store customer.",
+    "sql": "SELECT s.Name AS StoreName, COUNT(h.SalesOrderID) AS OrderCount FROM Sales.Store s JOIN Sales.Customer c ON s.BusinessEntityID = c.StoreID JOIN Sales.SalesOrderHeader h ON c.CustomerID = h.CustomerID GROUP BY s.Name ORDER BY OrderCount DESC;",
+    "tables": [
+      "Sales.Store",
+      "Sales.Customer",
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.Store.Name",
+      "Sales.Store.BusinessEntityID",
+      "Sales.Customer.StoreID",
+      "Sales.Customer.CustomerID",
+      "Sales.SalesOrderHeader.SalesOrderID"
+    ],
+    "concepts": [
+      "multi-table join",
+      "grouping"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_026",
+    "question": "Find store accounts managed by SalesPersonID 279.",
+    "sql": "SELECT BusinessEntityID, Name FROM Sales.Store WHERE SalesPersonID = 279;",
+    "tables": [
+      "Sales.Store"
+    ],
+    "columns": [
+      "Sales.Store.BusinessEntityID",
+      "Sales.Store.Name",
+      "Sales.Store.SalesPersonID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_027",
+    "question": "Find customers who placed at least 10 orders.",
+    "sql": "SELECT CustomerID, COUNT(*) AS OrderCount FROM Sales.SalesOrderHeader GROUP BY CustomerID HAVING COUNT(*) >= 10 ORDER BY OrderCount DESC;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.CustomerID",
+      "Sales.SalesOrderHeader.SalesOrderID"
+    ],
+    "concepts": [
+      "grouping",
+      "HAVING"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_028",
+    "question": "Find individual customers (where PersonID is not null and StoreID is null).",
+    "sql": "SELECT CustomerID, PersonID, TerritoryID, AccountNumber FROM Sales.Customer WHERE PersonID IS NOT NULL AND StoreID IS NULL;",
+    "tables": [
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.Customer.PersonID",
+      "Sales.Customer.StoreID",
+      "Sales.Customer.TerritoryID",
+      "Sales.Customer.AccountNumber"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_029",
+    "question": "Calculate average order TotalDue for individual customers vs store customers.",
+    "sql": "SELECT CASE WHEN c.StoreID IS NOT NULL THEN 'Store Customer' ELSE 'Individual Customer' END AS CustomerType, AVG(h.TotalDue) AS AvgTotalDue, COUNT(h.SalesOrderID) AS TotalOrders FROM Sales.Customer c JOIN Sales.SalesOrderHeader h ON c.CustomerID = h.CustomerID GROUP BY CASE WHEN c.StoreID IS NOT NULL THEN 'Store Customer' ELSE 'Individual Customer' END;",
+    "tables": [
+      "Sales.Customer",
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.Customer.StoreID",
+      "Sales.SalesOrderHeader.TotalDue",
+      "Sales.SalesOrderHeader.SalesOrderID"
+    ],
+    "concepts": [
+      "two-table join",
+      "conditional aggregation",
+      "grouping"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_030",
+    "question": "List top 5 stores alphabetically by name.",
+    "sql": "SELECT TOP 5 BusinessEntityID, Name FROM Sales.Store ORDER BY Name ASC;",
+    "tables": [
+      "Sales.Store"
+    ],
+    "columns": [
+      "Sales.Store.BusinessEntityID",
+      "Sales.Store.Name"
+    ],
+    "concepts": [
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_031",
+    "question": "List all sales representatives with their YTD sales and bonus.",
+    "sql": "SELECT BusinessEntityID, SalesYTD, SalesLastYear, Bonus, CommissionPct FROM Sales.SalesPerson ORDER BY SalesYTD DESC;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.SalesYTD",
+      "Sales.SalesPerson.SalesLastYear",
+      "Sales.SalesPerson.Bonus",
+      "Sales.SalesPerson.CommissionPct"
+    ],
+    "concepts": [
+      "ranking"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_032",
+    "question": "Find the total revenue (sum of SubTotal) handled by each SalesPersonID in SalesOrderHeader.",
+    "sql": "SELECT SalesPersonID, SUM(SubTotal) AS TotalRevenue, COUNT(*) AS OrderCount FROM Sales.SalesOrderHeader WHERE SalesPersonID IS NOT NULL GROUP BY SalesPersonID ORDER BY TotalRevenue DESC;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesPersonID",
+      "Sales.SalesOrderHeader.SubTotal",
+      "Sales.SalesOrderHeader.SalesOrderID"
+    ],
+    "concepts": [
+      "grouping",
+      "revenue"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_033",
+    "question": "List all sales territories, their country region code, and YTD sales.",
+    "sql": "SELECT TerritoryID, Name, CountryRegionCode, [Group], SalesYTD, SalesLastYear FROM Sales.SalesTerritory ORDER BY SalesYTD DESC;",
+    "tables": [
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.TerritoryID",
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesTerritory.CountryRegionCode",
+      "Sales.SalesTerritory.Group",
+      "Sales.SalesTerritory.SalesYTD",
+      "Sales.SalesTerritory.SalesLastYear"
+    ],
+    "concepts": [
+      "ranking"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_034",
+    "question": "Find sales representatives whose SalesYTD exceeds their SalesQuota.",
+    "sql": "SELECT BusinessEntityID, SalesQuota, SalesYTD, (SalesYTD - SalesQuota) AS ExcessSales FROM Sales.SalesPerson WHERE SalesQuota IS NOT NULL AND SalesYTD > SalesQuota;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.SalesQuota",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_035",
+    "question": "Find historical sales quotas recorded for SalesPerson BusinessEntityID 275.",
+    "sql": "SELECT BusinessEntityID, QuotaDate, SalesQuota FROM Sales.SalesPersonQuotaHistory WHERE BusinessEntityID = 275 ORDER BY QuotaDate ASC;",
+    "tables": [
+      "Sales.SalesPersonQuotaHistory"
+    ],
+    "columns": [
+      "Sales.SalesPersonQuotaHistory.BusinessEntityID",
+      "Sales.SalesPersonQuotaHistory.QuotaDate",
+      "Sales.SalesPersonQuotaHistory.SalesQuota"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_036",
+    "question": "Find active territory assignments for sales representatives in SalesTerritoryHistory.",
+    "sql": "SELECT BusinessEntityID, TerritoryID, StartDate FROM Sales.SalesTerritoryHistory WHERE EndDate IS NULL;",
+    "tables": [
+      "Sales.SalesTerritoryHistory"
+    ],
+    "columns": [
+      "Sales.SalesTerritoryHistory.BusinessEntityID",
+      "Sales.SalesTerritoryHistory.TerritoryID",
+      "Sales.SalesTerritoryHistory.StartDate",
+      "Sales.SalesTerritoryHistory.EndDate"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_037",
+    "question": "Find total YTD sales grouped by sales territory group (e.g. North America, Europe).",
+    "sql": "SELECT [Group], SUM(SalesYTD) AS TotalGroupSalesYTD FROM Sales.SalesTerritory GROUP BY [Group] ORDER BY TotalGroupSalesYTD DESC;",
+    "tables": [
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.Group",
+      "Sales.SalesTerritory.SalesYTD"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_038",
+    "question": "Find sales representatives assigned to TerritoryID 1.",
+    "sql": "SELECT BusinessEntityID, TerritoryID, SalesYTD FROM Sales.SalesPerson WHERE TerritoryID = 1;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.TerritoryID",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_039",
+    "question": "List all historical quota changes for year 2013 in SalesPersonQuotaHistory.",
+    "sql": "SELECT BusinessEntityID, QuotaDate, SalesQuota FROM Sales.SalesPersonQuotaHistory WHERE YEAR(QuotaDate) = 2013 ORDER BY QuotaDate;",
+    "tables": [
+      "Sales.SalesPersonQuotaHistory"
+    ],
+    "columns": [
+      "Sales.SalesPersonQuotaHistory.BusinessEntityID",
+      "Sales.SalesPersonQuotaHistory.QuotaDate",
+      "Sales.SalesPersonQuotaHistory.SalesQuota"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_040",
+    "question": "Find territory names and order counts for each territory by joining SalesTerritory to SalesOrderHeader.",
+    "sql": "SELECT t.Name AS TerritoryName, COUNT(h.SalesOrderID) AS OrderCount, SUM(h.TotalDue) AS TotalSales FROM Sales.SalesTerritory t JOIN Sales.SalesOrderHeader h ON t.TerritoryID = h.TerritoryID GROUP BY t.Name ORDER BY TotalSales DESC;",
+    "tables": [
+      "Sales.SalesTerritory",
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesTerritory.TerritoryID",
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "two-table join",
+      "grouping"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_041",
+    "question": "List all active special offers, their discount percentage, and offer type.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, Type, Category, StartDate, EndDate FROM Sales.SpecialOffer ORDER BY DiscountPct DESC;",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.DiscountPct",
+      "Sales.SpecialOffer.Type",
+      "Sales.SpecialOffer.Category",
+      "Sales.SpecialOffer.StartDate",
+      "Sales.SpecialOffer.EndDate"
+    ],
+    "concepts": [
+      "ranking"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_042",
+    "question": "Find all promotional special offers with DiscountPct greater than 0.10 (10%).",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, Type FROM Sales.SpecialOffer WHERE DiscountPct > 0.10;",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.DiscountPct",
+      "Sales.SpecialOffer.Type"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_043",
+    "question": "Find products associated with SpecialOfferID 2 in SpecialOfferProduct.",
+    "sql": "SELECT SpecialOfferID, ProductID FROM Sales.SpecialOfferProduct WHERE SpecialOfferID = 2;",
+    "tables": [
+      "Sales.SpecialOfferProduct"
+    ],
+    "columns": [
+      "Sales.SpecialOfferProduct.SpecialOfferID",
+      "Sales.SpecialOfferProduct.ProductID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_044",
+    "question": "Find special offer descriptions and associated product IDs by joining SpecialOffer to SpecialOfferProduct.",
+    "sql": "SELECT o.SpecialOfferID, o.Description, o.DiscountPct, p.ProductID FROM Sales.SpecialOffer o JOIN Sales.SpecialOfferProduct p ON o.SpecialOfferID = p.SpecialOfferID ORDER BY o.SpecialOfferID;",
+    "tables": [
+      "Sales.SpecialOffer",
+      "Sales.SpecialOfferProduct"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.DiscountPct",
+      "Sales.SpecialOfferProduct.ProductID"
+    ],
+    "concepts": [
+      "two-table join"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_045",
+    "question": "Count total credit cards stored per card type in CreditCard.",
+    "sql": "SELECT CardType, COUNT(*) AS CardCount FROM Sales.CreditCard GROUP BY CardType ORDER BY CardCount DESC;",
+    "tables": [
+      "Sales.CreditCard"
+    ],
+    "columns": [
+      "Sales.CreditCard.CardType",
+      "Sales.CreditCard.CreditCardID"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_046",
+    "question": "Find all credit cards expiring in year 2008.",
+    "sql": "SELECT CreditCardID, CardType, ExpMonth, ExpYear FROM Sales.CreditCard WHERE ExpYear = 2008;",
+    "tables": [
+      "Sales.CreditCard"
+    ],
+    "columns": [
+      "Sales.CreditCard.CreditCardID",
+      "Sales.CreditCard.CardType",
+      "Sales.CreditCard.ExpMonth",
+      "Sales.CreditCard.ExpYear"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_047",
+    "question": "Count credit card mappings per individual person in PersonCreditCard.",
+    "sql": "SELECT BusinessEntityID, COUNT(*) AS CardCount FROM Sales.PersonCreditCard GROUP BY BusinessEntityID HAVING COUNT(*) > 1 ORDER BY CardCount DESC;",
+    "tables": [
+      "Sales.PersonCreditCard"
+    ],
+    "columns": [
+      "Sales.PersonCreditCard.BusinessEntityID",
+      "Sales.PersonCreditCard.CreditCardID"
+    ],
+    "concepts": [
+      "grouping",
+      "HAVING"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_048",
+    "question": "Find total orders paid using Vista credit cards.",
+    "sql": "SELECT c.CardType, COUNT(h.SalesOrderID) AS OrderCount, SUM(h.TotalDue) AS TotalPaid FROM Sales.CreditCard c JOIN Sales.SalesOrderHeader h ON c.CreditCardID = h.CreditCardID WHERE c.CardType = 'Vista' GROUP BY c.CardType;",
+    "tables": [
+      "Sales.CreditCard",
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.CreditCard.CardType",
+      "Sales.CreditCard.CreditCardID",
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.TotalDue",
+      "Sales.SalesOrderHeader.CreditCardID"
+    ],
+    "concepts": [
+      "two-table join",
+      "aggregation"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_049",
+    "question": "Find special offers of type 'Volume Discount'.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, MinQty, MaxQty FROM Sales.SpecialOffer WHERE Type = 'Volume Discount';",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.DiscountPct",
+      "Sales.SpecialOffer.MinQty",
+      "Sales.SpecialOffer.MaxQty",
+      "Sales.SpecialOffer.Type"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_050",
+    "question": "Count how many products are linked to each SpecialOfferID in SpecialOfferProduct.",
+    "sql": "SELECT SpecialOfferID, COUNT(ProductID) AS ProductCount FROM Sales.SpecialOfferProduct GROUP BY SpecialOfferID ORDER BY ProductCount DESC;",
+    "tables": [
+      "Sales.SpecialOfferProduct"
+    ],
+    "columns": [
+      "Sales.SpecialOfferProduct.SpecialOfferID",
+      "Sales.SpecialOfferProduct.ProductID"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_051",
+    "question": "List all ISO currency codes and currency names in Currency.",
+    "sql": "SELECT CurrencyCode, Name FROM Sales.Currency ORDER BY CurrencyCode;",
+    "tables": [
+      "Sales.Currency"
+    ],
+    "columns": [
+      "Sales.Currency.CurrencyCode",
+      "Sales.Currency.Name"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_052",
+    "question": "Find exchange rates for USD to EUR in CurrencyRate.",
+    "sql": "SELECT CurrencyRateID, CurrencyRateDate, FromCurrencyCode, ToCurrencyCode, AverageRate, EndOfDayRate FROM Sales.CurrencyRate WHERE FromCurrencyCode = 'USD' AND ToCurrencyCode = 'EUR' ORDER BY CurrencyRateDate DESC;",
+    "tables": [
+      "Sales.CurrencyRate"
+    ],
+    "columns": [
+      "Sales.CurrencyRate.CurrencyRateID",
+      "Sales.CurrencyRate.CurrencyRateDate",
+      "Sales.CurrencyRate.FromCurrencyCode",
+      "Sales.CurrencyRate.ToCurrencyCode",
+      "Sales.CurrencyRate.AverageRate",
+      "Sales.CurrencyRate.EndOfDayRate"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_053",
+    "question": "Find the currency code used for country region US in CountryRegionCurrency.",
+    "sql": "SELECT CountryRegionCode, CurrencyCode FROM Sales.CountryRegionCurrency WHERE CountryRegionCode = 'US';",
+    "tables": [
+      "Sales.CountryRegionCurrency"
+    ],
+    "columns": [
+      "Sales.CountryRegionCurrency.CountryRegionCode",
+      "Sales.CountryRegionCurrency.CurrencyCode"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_054",
+    "question": "List all sales reasons and their reason type.",
+    "sql": "SELECT SalesReasonID, Name, ReasonType FROM Sales.SalesReason ORDER BY ReasonType, Name;",
+    "tables": [
+      "Sales.SalesReason"
+    ],
+    "columns": [
+      "Sales.SalesReason.SalesReasonID",
+      "Sales.SalesReason.Name",
+      "Sales.SalesReason.ReasonType"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_055",
+    "question": "Count sales order headers linked to each SalesReasonID in SalesOrderHeaderSalesReason.",
+    "sql": "SELECT SalesReasonID, COUNT(SalesOrderID) AS OrderCount FROM Sales.SalesOrderHeaderSalesReason GROUP BY SalesReasonID ORDER BY OrderCount DESC;",
+    "tables": [
+      "Sales.SalesOrderHeaderSalesReason"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeaderSalesReason.SalesReasonID",
+      "Sales.SalesOrderHeaderSalesReason.SalesOrderID"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_056",
+    "question": "Find sales reasons and order counts by joining SalesReason to SalesOrderHeaderSalesReason.",
+    "sql": "SELECT r.Name AS ReasonName, r.ReasonType, COUNT(sr.SalesOrderID) AS OrderCount FROM Sales.SalesReason r JOIN Sales.SalesOrderHeaderSalesReason sr ON r.SalesReasonID = sr.SalesReasonID GROUP BY r.Name, r.ReasonType ORDER BY OrderCount DESC;",
+    "tables": [
+      "Sales.SalesReason",
+      "Sales.SalesOrderHeaderSalesReason"
+    ],
+    "columns": [
+      "Sales.SalesReason.Name",
+      "Sales.SalesReason.ReasonType",
+      "Sales.SalesReason.SalesReasonID",
+      "Sales.SalesOrderHeaderSalesReason.SalesOrderID",
+      "Sales.SalesOrderHeaderSalesReason.SalesReasonID"
+    ],
+    "concepts": [
+      "two-table join",
+      "grouping"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_057",
+    "question": "Find state province tax rates in SalesTaxRate where TaxType is 1 (State tax).",
+    "sql": "SELECT SalesTaxRateID, StateProvinceID, TaxType, TaxRate, Name FROM Sales.SalesTaxRate WHERE TaxType = 1 ORDER BY TaxRate DESC;",
+    "tables": [
+      "Sales.SalesTaxRate"
+    ],
+    "columns": [
+      "Sales.SalesTaxRate.SalesTaxRateID",
+      "Sales.SalesTaxRate.StateProvinceID",
+      "Sales.SalesTaxRate.TaxType",
+      "Sales.SalesTaxRate.TaxRate",
+      "Sales.SalesTaxRate.Name"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_058",
+    "question": "Find items currently stored in ShoppingCartItem with quantity greater than 1.",
+    "sql": "SELECT ShoppingCartItemID, ShoppingCartID, Quantity, ProductID, DateCreated FROM Sales.ShoppingCartItem WHERE Quantity > 1 ORDER BY Quantity DESC;",
+    "tables": [
+      "Sales.ShoppingCartItem"
+    ],
+    "columns": [
+      "Sales.ShoppingCartItem.ShoppingCartItemID",
+      "Sales.ShoppingCartItem.ShoppingCartID",
+      "Sales.ShoppingCartItem.Quantity",
+      "Sales.ShoppingCartItem.ProductID",
+      "Sales.ShoppingCartItem.DateCreated"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_059",
+    "question": "Count shopping cart items grouped by ShoppingCartID.",
+    "sql": "SELECT ShoppingCartID, SUM(Quantity) AS TotalItems FROM Sales.ShoppingCartItem GROUP BY ShoppingCartID ORDER BY TotalItems DESC;",
+    "tables": [
+      "Sales.ShoppingCartItem"
+    ],
+    "columns": [
+      "Sales.ShoppingCartItem.ShoppingCartID",
+      "Sales.ShoppingCartItem.Quantity"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_060",
+    "question": "Find the highest sales tax rate in SalesTaxRate.",
+    "sql": "SELECT TOP 1 SalesTaxRateID, Name, TaxRate FROM Sales.SalesTaxRate ORDER BY TaxRate DESC;",
+    "tables": [
+      "Sales.SalesTaxRate"
+    ],
+    "columns": [
+      "Sales.SalesTaxRate.SalesTaxRateID",
+      "Sales.SalesTaxRate.Name",
+      "Sales.SalesTaxRate.TaxRate"
+    ],
+    "concepts": [
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_061",
+    "question": "Find sales orders with customer account number and sales territory name.",
+    "sql": "SELECT h.SalesOrderID, c.AccountNumber, t.Name AS TerritoryName, h.TotalDue FROM Sales.SalesOrderHeader h JOIN Sales.Customer c ON h.CustomerID = c.CustomerID JOIN Sales.SalesTerritory t ON h.TerritoryID = t.TerritoryID WHERE h.TotalDue > 100000 ORDER BY h.TotalDue DESC;",
+    "tables": [
+      "Sales.SalesOrderHeader",
+      "Sales.Customer",
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.Customer.AccountNumber",
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "multi-table join",
+      "filtering"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_062",
+    "question": "Find total sales amount (sum of TotalDue) and average freight for orders placed in each country region by joining SalesTerritory.",
+    "sql": "SELECT t.CountryRegionCode, SUM(h.TotalDue) AS TotalSales, AVG(h.Freight) AS AvgFreight FROM Sales.SalesTerritory t JOIN Sales.SalesOrderHeader h ON t.TerritoryID = h.TerritoryID GROUP BY t.CountryRegionCode ORDER BY TotalSales DESC;",
+    "tables": [
+      "Sales.SalesTerritory",
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.CountryRegionCode",
+      "Sales.SalesOrderHeader.TotalDue",
+      "Sales.SalesOrderHeader.Freight"
+    ],
+    "concepts": [
+      "two-table join",
+      "grouping"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_063",
+    "question": "Find the total line revenue (sum of LineTotal) per SpecialOfferID description.",
+    "sql": "SELECT o.Description, SUM(d.LineTotal) AS TotalOfferRevenue FROM Sales.SpecialOffer o JOIN Sales.SalesOrderDetail d ON o.SpecialOfferID = d.SpecialOfferID GROUP BY o.Description ORDER BY TotalOfferRevenue DESC;",
+    "tables": [
+      "Sales.SpecialOffer",
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SalesOrderDetail.LineTotal",
+      "Sales.SalesOrderDetail.SpecialOfferID"
+    ],
+    "concepts": [
+      "two-table join",
+      "revenue"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_064",
+    "question": "Rank territory sales YTD within each geographic group using RANK window function.",
+    "sql": "SELECT TerritoryID, Name, [Group], SalesYTD, RANK() OVER (PARTITION BY [Group] ORDER BY SalesYTD DESC) AS TerritoryRank FROM Sales.SalesTerritory ORDER BY [Group], TerritoryRank;",
+    "tables": [
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.TerritoryID",
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesTerritory.Group",
+      "Sales.SalesTerritory.SalesYTD"
+    ],
+    "concepts": [
+      "window functions",
+      "ranking"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_065",
+    "question": "Find sales representatives whose SalesYTD is greater than the average SalesYTD of all sales reps.",
+    "sql": "SELECT BusinessEntityID, SalesYTD FROM Sales.SalesPerson WHERE SalesYTD > (SELECT AVG(SalesYTD) FROM Sales.SalesPerson) ORDER BY SalesYTD DESC;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "subqueries",
+      "filtering"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_066",
+    "question": "Calculate monthly sales revenue using a CTE and select months with revenue over 2000000.",
+    "sql": "WITH MonthlySales AS (SELECT YEAR(OrderDate) AS OrderYear, MONTH(OrderDate) AS OrderMonth, SUM(SubTotal) AS Revenue FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate), MONTH(OrderDate)) SELECT OrderYear, OrderMonth, Revenue FROM MonthlySales WHERE Revenue > 2000000 ORDER BY OrderYear, OrderMonth;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.OrderDate",
+      "Sales.SalesOrderHeader.SubTotal"
+    ],
+    "concepts": [
+      "CTEs",
+      "revenue"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_067",
+    "question": "Find store name, customer account number, and total order count for stores managed by SalesPersonID 279.",
+    "sql": "SELECT s.Name AS StoreName, c.AccountNumber, COUNT(h.SalesOrderID) AS OrderCount FROM Sales.Store s JOIN Sales.Customer c ON s.BusinessEntityID = c.StoreID JOIN Sales.SalesOrderHeader h ON c.CustomerID = h.CustomerID WHERE s.SalesPersonID = 279 GROUP BY s.Name, c.AccountNumber ORDER BY OrderCount DESC;",
+    "tables": [
+      "Sales.Store",
+      "Sales.Customer",
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.Store.Name",
+      "Sales.Store.SalesPersonID",
+      "Sales.Customer.AccountNumber",
+      "Sales.SalesOrderHeader.SalesOrderID"
+    ],
+    "concepts": [
+      "multi-table join",
+      "grouping"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_068",
+    "question": "Find customer ID and order date for orders using currency exchange rates.",
+    "sql": "SELECT h.SalesOrderID, h.CustomerID, h.OrderDate, r.FromCurrencyCode, r.ToCurrencyCode, r.AverageRate FROM Sales.SalesOrderHeader h JOIN Sales.CurrencyRate r ON h.CurrencyRateID = r.CurrencyRateID ORDER BY h.OrderDate DESC;",
+    "tables": [
+      "Sales.SalesOrderHeader",
+      "Sales.CurrencyRate"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.CustomerID",
+      "Sales.SalesOrderHeader.OrderDate",
+      "Sales.CurrencyRate.FromCurrencyCode",
+      "Sales.CurrencyRate.ToCurrencyCode",
+      "Sales.CurrencyRate.AverageRate"
+    ],
+    "concepts": [
+      "two-table join"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_069",
+    "question": "Find all promotional offers in SpecialOffer where Category is 'Reseller'.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, Type FROM Sales.SpecialOffer WHERE Category = 'Reseller';",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.DiscountPct",
+      "Sales.SpecialOffer.Type",
+      "Sales.SpecialOffer.Category"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_070",
+    "question": "Calculate the running total of annual sales SubTotal by year using SUM() window function.",
+    "sql": "WITH YearlySales AS (SELECT YEAR(OrderDate) AS OrderYear, SUM(SubTotal) AS AnnualSales FROM Sales.SalesOrderHeader GROUP BY YEAR(OrderDate)) SELECT OrderYear, AnnualSales, SUM(AnnualSales) OVER (ORDER BY OrderYear) AS CumulativeSales FROM YearlySales ORDER BY OrderYear;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.OrderDate",
+      "Sales.SalesOrderHeader.SubTotal"
+    ],
+    "concepts": [
+      "window functions",
+      "CTEs",
+      "temporal"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_071",
+    "question": "List all currencies associated with country region codes in CountryRegionCurrency.",
+    "sql": "SELECT CountryRegionCode, CurrencyCode FROM Sales.CountryRegionCurrency ORDER BY CountryRegionCode;",
+    "tables": [
+      "Sales.CountryRegionCurrency"
+    ],
+    "columns": [
+      "Sales.CountryRegionCurrency.CountryRegionCode",
+      "Sales.CountryRegionCurrency.CurrencyCode"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_072",
+    "question": "Find sales tax rates for StateProvinceID 79 in SalesTaxRate.",
+    "sql": "SELECT SalesTaxRateID, StateProvinceID, TaxType, TaxRate, Name FROM Sales.SalesTaxRate WHERE StateProvinceID = 79;",
+    "tables": [
+      "Sales.SalesTaxRate"
+    ],
+    "columns": [
+      "Sales.SalesTaxRate.SalesTaxRateID",
+      "Sales.SalesTaxRate.StateProvinceID",
+      "Sales.SalesTaxRate.TaxType",
+      "Sales.SalesTaxRate.TaxRate",
+      "Sales.SalesTaxRate.Name"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_073",
+    "question": "Find historical territory assignments for SalesPerson BusinessEntityID 275.",
+    "sql": "SELECT BusinessEntityID, TerritoryID, StartDate, EndDate FROM Sales.SalesTerritoryHistory WHERE BusinessEntityID = 275 ORDER BY StartDate;",
+    "tables": [
+      "Sales.SalesTerritoryHistory"
+    ],
+    "columns": [
+      "Sales.SalesTerritoryHistory.BusinessEntityID",
+      "Sales.SalesTerritoryHistory.TerritoryID",
+      "Sales.SalesTerritoryHistory.StartDate",
+      "Sales.SalesTerritoryHistory.EndDate"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_074",
+    "question": "Find customer ID and card type for customers using credit cards in SalesOrderHeader.",
+    "sql": "SELECT h.SalesOrderID, h.CustomerID, c.CardType, h.TotalDue FROM Sales.SalesOrderHeader h JOIN Sales.CreditCard c ON h.CreditCardID = c.CreditCardID WHERE h.TotalDue > 50000 ORDER BY h.TotalDue DESC;",
+    "tables": [
+      "Sales.SalesOrderHeader",
+      "Sales.CreditCard"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.CustomerID",
+      "Sales.CreditCard.CardType",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "two-table join"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_075",
+    "question": "Count total products linked to active special offers in SpecialOfferProduct.",
+    "sql": "SELECT COUNT(DISTINCT ProductID) AS PromotionalProductCount FROM Sales.SpecialOfferProduct;",
+    "tables": [
+      "Sales.SpecialOfferProduct"
+    ],
+    "columns": [
+      "Sales.SpecialOfferProduct.ProductID"
+    ],
+    "concepts": [
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_076",
+    "question": "Find individual person credit card assignments for BusinessEntityID 292.",
+    "sql": "SELECT BusinessEntityID, CreditCardID FROM Sales.PersonCreditCard WHERE BusinessEntityID = 292;",
+    "tables": [
+      "Sales.PersonCreditCard"
+    ],
+    "columns": [
+      "Sales.PersonCreditCard.BusinessEntityID",
+      "Sales.PersonCreditCard.CreditCardID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_077",
+    "question": "Find total line items and total revenue per ProductID in SalesOrderDetail.",
+    "sql": "SELECT ProductID, COUNT(*) AS LineItemCount, SUM(LineTotal) AS TotalProductRevenue FROM Sales.SalesOrderDetail GROUP BY ProductID HAVING SUM(LineTotal) > 100000 ORDER BY TotalProductRevenue DESC;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.ProductID",
+      "Sales.SalesOrderDetail.LineTotal"
+    ],
+    "concepts": [
+      "grouping",
+      "HAVING",
+      "revenue"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_078",
+    "question": "Find sales representative bonus and commission rate for reps with SalesYTD over 2000000.",
+    "sql": "SELECT BusinessEntityID, SalesYTD, Bonus, CommissionPct FROM Sales.SalesPerson WHERE SalesYTD > 2000000 ORDER BY SalesYTD DESC;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.SalesYTD",
+      "Sales.SalesPerson.Bonus",
+      "Sales.SalesPerson.CommissionPct"
+    ],
+    "concepts": [
+      "filtering",
+      "ranking"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_079",
+    "question": "Find all special offers starting in year 2013.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, StartDate, EndDate FROM Sales.SpecialOffer WHERE YEAR(StartDate) = 2013;",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.DiscountPct",
+      "Sales.SpecialOffer.StartDate",
+      "Sales.SpecialOffer.EndDate"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_080",
+    "question": "Find total orders and total revenue per year for online orders only.",
+    "sql": "SELECT YEAR(OrderDate) AS OrderYear, COUNT(*) AS OnlineOrderCount, SUM(SubTotal) AS OnlineRevenue FROM Sales.SalesOrderHeader WHERE OnlineOrderFlag = 1 GROUP BY YEAR(OrderDate) ORDER BY OrderYear;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.OrderDate",
+      "Sales.SalesOrderHeader.OnlineOrderFlag",
+      "Sales.SalesOrderHeader.SubTotal"
+    ],
+    "concepts": [
+      "grouping",
+      "temporal",
+      "revenue"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_081",
+    "question": "Find customers located in TerritoryID 4 with account numbers starting with 'AW'.",
+    "sql": "SELECT CustomerID, AccountNumber, TerritoryID FROM Sales.Customer WHERE TerritoryID = 4 AND AccountNumber LIKE 'AW%';",
+    "tables": [
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.Customer.AccountNumber",
+      "Sales.Customer.TerritoryID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_082",
+    "question": "Find total orders placed by customer 11000.",
+    "sql": "SELECT CustomerID, COUNT(*) AS OrderCount, SUM(TotalDue) AS TotalSpent FROM Sales.SalesOrderHeader WHERE CustomerID = 11000 GROUP BY CustomerID;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.CustomerID",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_083",
+    "question": "List store names containing the word 'Bike' in Sales.Store.",
+    "sql": "SELECT BusinessEntityID, Name FROM Sales.Store WHERE Name LIKE '%Bike%' ORDER BY Name;",
+    "tables": [
+      "Sales.Store"
+    ],
+    "columns": [
+      "Sales.Store.BusinessEntityID",
+      "Sales.Store.Name"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_084",
+    "question": "Find the top 3 territories with the highest number of stores.",
+    "sql": "SELECT TOP 3 c.TerritoryID, COUNT(s.BusinessEntityID) AS StoreCount FROM Sales.Store s JOIN Sales.Customer c ON s.BusinessEntityID = c.StoreID GROUP BY c.TerritoryID ORDER BY StoreCount DESC;",
+    "tables": [
+      "Sales.Store",
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Store.BusinessEntityID",
+      "Sales.Customer.StoreID",
+      "Sales.Customer.TerritoryID"
+    ],
+    "concepts": [
+      "two-table join",
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_085",
+    "question": "Find store customer orders where order total due exceeds 10000.",
+    "sql": "SELECT s.Name AS StoreName, h.SalesOrderID, h.TotalDue FROM Sales.Store s JOIN Sales.Customer c ON s.BusinessEntityID = c.StoreID JOIN Sales.SalesOrderHeader h ON c.CustomerID = h.CustomerID WHERE h.TotalDue > 10000 ORDER BY h.TotalDue DESC;",
+    "tables": [
+      "Sales.Store",
+      "Sales.Customer",
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.Store.Name",
+      "Sales.Customer.CustomerID",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "multi-table join",
+      "filtering"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_086",
+    "question": "Find sales representatives with CommissionPct greater than 0.01.",
+    "sql": "SELECT BusinessEntityID, CommissionPct, SalesYTD FROM Sales.SalesPerson WHERE CommissionPct > 0.01 ORDER BY CommissionPct DESC;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.CommissionPct",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_087",
+    "question": "Find territory names and total YTD sales for European group territories.",
+    "sql": "SELECT Name, CountryRegionCode, SalesYTD FROM Sales.SalesTerritory WHERE [Group] = 'Europe' ORDER BY SalesYTD DESC;",
+    "tables": [
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesTerritory.CountryRegionCode",
+      "Sales.SalesTerritory.SalesYTD",
+      "Sales.SalesTerritory.Group"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_088",
+    "question": "Find quota history records where SalesQuota exceeded 300000.",
+    "sql": "SELECT BusinessEntityID, QuotaDate, SalesQuota FROM Sales.SalesPersonQuotaHistory WHERE SalesQuota > 300000 ORDER BY SalesQuota DESC;",
+    "tables": [
+      "Sales.SalesPersonQuotaHistory"
+    ],
+    "columns": [
+      "Sales.SalesPersonQuotaHistory.BusinessEntityID",
+      "Sales.SalesPersonQuotaHistory.QuotaDate",
+      "Sales.SalesPersonQuotaHistory.SalesQuota"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_089",
+    "question": "Find territory history entries starting after 2010.",
+    "sql": "SELECT BusinessEntityID, TerritoryID, StartDate, EndDate FROM Sales.SalesTerritoryHistory WHERE YEAR(StartDate) > 2010 ORDER BY StartDate;",
+    "tables": [
+      "Sales.SalesTerritoryHistory"
+    ],
+    "columns": [
+      "Sales.SalesTerritoryHistory.BusinessEntityID",
+      "Sales.SalesTerritoryHistory.TerritoryID",
+      "Sales.SalesTerritoryHistory.StartDate"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_090",
+    "question": "Find top sales representative by SalesYTD in each territory group.",
+    "sql": "WITH RankedReps AS (SELECT p.BusinessEntityID, t.[Group], p.SalesYTD, ROW_NUMBER() OVER (PARTITION BY t.[Group] ORDER BY p.SalesYTD DESC) AS RepRank FROM Sales.SalesPerson p JOIN Sales.SalesTerritory t ON p.TerritoryID = t.TerritoryID) SELECT BusinessEntityID, [Group], SalesYTD FROM RankedReps WHERE RepRank = 1;",
+    "tables": [
+      "Sales.SalesPerson",
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesTerritory.Group",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "two-table join",
+      "window functions",
+      "CTEs"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "vq_091",
+    "question": "Find special offer descriptions with MinQty greater than 5.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, MinQty FROM Sales.SpecialOffer WHERE MinQty > 5;",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.DiscountPct",
+      "Sales.SpecialOffer.MinQty"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_092",
+    "question": "Find products linked to SpecialOfferID 1 in SpecialOfferProduct.",
+    "sql": "SELECT SpecialOfferID, ProductID FROM Sales.SpecialOfferProduct WHERE SpecialOfferID = 1;",
+    "tables": [
+      "Sales.SpecialOfferProduct"
+    ],
+    "columns": [
+      "Sales.SpecialOfferProduct.SpecialOfferID",
+      "Sales.SpecialOfferProduct.ProductID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_093",
+    "question": "Find credit cards expiring in month 12.",
+    "sql": "SELECT CreditCardID, CardType, ExpMonth, ExpYear FROM Sales.CreditCard WHERE ExpMonth = 12;",
+    "tables": [
+      "Sales.CreditCard"
+    ],
+    "columns": [
+      "Sales.CreditCard.CreditCardID",
+      "Sales.CreditCard.CardType",
+      "Sales.CreditCard.ExpMonth"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_094",
+    "question": "Find currency rates where AverageRate is greater than 1.0.",
+    "sql": "SELECT CurrencyRateID, FromCurrencyCode, ToCurrencyCode, AverageRate FROM Sales.CurrencyRate WHERE AverageRate > 1.0 ORDER BY AverageRate DESC;",
+    "tables": [
+      "Sales.CurrencyRate"
+    ],
+    "columns": [
+      "Sales.CurrencyRate.CurrencyRateID",
+      "Sales.CurrencyRate.FromCurrencyCode",
+      "Sales.CurrencyRate.ToCurrencyCode",
+      "Sales.CurrencyRate.AverageRate"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_095",
+    "question": "Find country region codes using EUR currency in CountryRegionCurrency.",
+    "sql": "SELECT CountryRegionCode, CurrencyCode FROM Sales.CountryRegionCurrency WHERE CurrencyCode = 'EUR';",
+    "tables": [
+      "Sales.CountryRegionCurrency"
+    ],
+    "columns": [
+      "Sales.CountryRegionCurrency.CountryRegionCode",
+      "Sales.CountryRegionCurrency.CurrencyCode"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_096",
+    "question": "List sales reasons of type 'Marketing'.",
+    "sql": "SELECT SalesReasonID, Name, ReasonType FROM Sales.SalesReason WHERE ReasonType = 'Marketing';",
+    "tables": [
+      "Sales.SalesReason"
+    ],
+    "columns": [
+      "Sales.SalesReason.SalesReasonID",
+      "Sales.SalesReason.Name",
+      "Sales.SalesReason.ReasonType"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_097",
+    "question": "Find order header sales reasons for SalesOrderID 43660.",
+    "sql": "SELECT SalesOrderID, SalesReasonID FROM Sales.SalesOrderHeaderSalesReason WHERE SalesOrderID = 43660;",
+    "tables": [
+      "Sales.SalesOrderHeaderSalesReason"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeaderSalesReason.SalesOrderID",
+      "Sales.SalesOrderHeaderSalesReason.SalesReasonID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_098",
+    "question": "Find sales tax rates where TaxRate is greater than 0.08 (8%).",
+    "sql": "SELECT SalesTaxRateID, StateProvinceID, TaxRate, Name FROM Sales.SalesTaxRate WHERE TaxRate > 0.08 ORDER BY TaxRate DESC;",
+    "tables": [
+      "Sales.SalesTaxRate"
+    ],
+    "columns": [
+      "Sales.SalesTaxRate.SalesTaxRateID",
+      "Sales.SalesTaxRate.StateProvinceID",
+      "Sales.SalesTaxRate.TaxRate"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_099",
+    "question": "Find shopping cart items created after 2013-01-01.",
+    "sql": "SELECT ShoppingCartItemID, ShoppingCartID, Quantity, DateCreated FROM Sales.ShoppingCartItem WHERE DateCreated >= '2013-01-01';",
+    "tables": [
+      "Sales.ShoppingCartItem"
+    ],
+    "columns": [
+      "Sales.ShoppingCartItem.ShoppingCartItemID",
+      "Sales.ShoppingCartItem.ShoppingCartID",
+      "Sales.ShoppingCartItem.DateCreated"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_100",
+    "question": "Count total products linked to each special offer in SpecialOfferProduct.",
+    "sql": "SELECT SpecialOfferID, COUNT(ProductID) AS TotalProducts FROM Sales.SpecialOfferProduct GROUP BY SpecialOfferID ORDER BY TotalProducts DESC;",
+    "tables": [
+      "Sales.SpecialOfferProduct"
+    ],
+    "columns": [
+      "Sales.SpecialOfferProduct.SpecialOfferID",
+      "Sales.SpecialOfferProduct.ProductID"
+    ],
+    "concepts": [
+      "grouping",
+      "aggregation"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_101",
+    "question": "Find total sales tax rate per state province ID 51 in SalesTaxRate.",
+    "sql": "SELECT SalesTaxRateID, StateProvinceID, TaxRate FROM Sales.SalesTaxRate WHERE StateProvinceID = 51;",
+    "tables": [
+      "Sales.SalesTaxRate"
+    ],
+    "columns": [
+      "Sales.SalesTaxRate.SalesTaxRateID",
+      "Sales.SalesTaxRate.StateProvinceID",
+      "Sales.SalesTaxRate.TaxRate"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_102",
+    "question": "Find total sales tax rate per state province ID 52 in SalesTaxRate.",
+    "sql": "SELECT SalesTaxRateID, StateProvinceID, TaxRate FROM Sales.SalesTaxRate WHERE StateProvinceID = 52;",
+    "tables": [
+      "Sales.SalesTaxRate"
+    ],
+    "columns": [
+      "Sales.SalesTaxRate.SalesTaxRateID",
+      "Sales.SalesTaxRate.StateProvinceID",
+      "Sales.SalesTaxRate.TaxRate"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_103",
+    "question": "Find total sales tax rate per state province ID 53 in SalesTaxRate.",
+    "sql": "SELECT SalesTaxRateID, StateProvinceID, TaxRate FROM Sales.SalesTaxRate WHERE StateProvinceID = 53;",
+    "tables": [
+      "Sales.SalesTaxRate"
+    ],
+    "columns": [
+      "Sales.SalesTaxRate.SalesTaxRateID",
+      "Sales.SalesTaxRate.StateProvinceID",
+      "Sales.SalesTaxRate.TaxRate"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_104",
+    "question": "Find total sales tax rate per state province ID 54 in SalesTaxRate.",
+    "sql": "SELECT SalesTaxRateID, StateProvinceID, TaxRate FROM Sales.SalesTaxRate WHERE StateProvinceID = 54;",
+    "tables": [
+      "Sales.SalesTaxRate"
+    ],
+    "columns": [
+      "Sales.SalesTaxRate.SalesTaxRateID",
+      "Sales.SalesTaxRate.StateProvinceID",
+      "Sales.SalesTaxRate.TaxRate"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_105",
+    "question": "Find total sales tax rate per state province ID 55 in SalesTaxRate.",
+    "sql": "SELECT SalesTaxRateID, StateProvinceID, TaxRate FROM Sales.SalesTaxRate WHERE StateProvinceID = 55;",
+    "tables": [
+      "Sales.SalesTaxRate"
+    ],
+    "columns": [
+      "Sales.SalesTaxRate.SalesTaxRateID",
+      "Sales.SalesTaxRate.StateProvinceID",
+      "Sales.SalesTaxRate.TaxRate"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_106",
+    "question": "Find currency exchange rates recorded on date 2011-05-31 in CurrencyRate.",
+    "sql": "SELECT CurrencyRateID, FromCurrencyCode, ToCurrencyCode, AverageRate FROM Sales.CurrencyRate WHERE CurrencyRateDate = '2011-05-31';",
+    "tables": [
+      "Sales.CurrencyRate"
+    ],
+    "columns": [
+      "Sales.CurrencyRate.CurrencyRateID",
+      "Sales.CurrencyRate.CurrencyRateDate",
+      "Sales.CurrencyRate.AverageRate"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_107",
+    "question": "Find currency exchange rates recorded on date 2011-05-31 in CurrencyRate.",
+    "sql": "SELECT CurrencyRateID, FromCurrencyCode, ToCurrencyCode, AverageRate FROM Sales.CurrencyRate WHERE CurrencyRateDate = '2011-05-31';",
+    "tables": [
+      "Sales.CurrencyRate"
+    ],
+    "columns": [
+      "Sales.CurrencyRate.CurrencyRateID",
+      "Sales.CurrencyRate.CurrencyRateDate",
+      "Sales.CurrencyRate.AverageRate"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_108",
+    "question": "Find currency exchange rates recorded on date 2011-05-31 in CurrencyRate.",
+    "sql": "SELECT CurrencyRateID, FromCurrencyCode, ToCurrencyCode, AverageRate FROM Sales.CurrencyRate WHERE CurrencyRateDate = '2011-05-31';",
+    "tables": [
+      "Sales.CurrencyRate"
+    ],
+    "columns": [
+      "Sales.CurrencyRate.CurrencyRateID",
+      "Sales.CurrencyRate.CurrencyRateDate",
+      "Sales.CurrencyRate.AverageRate"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_109",
+    "question": "Find currency exchange rates recorded on date 2011-05-31 in CurrencyRate.",
+    "sql": "SELECT CurrencyRateID, FromCurrencyCode, ToCurrencyCode, AverageRate FROM Sales.CurrencyRate WHERE CurrencyRateDate = '2011-05-31';",
+    "tables": [
+      "Sales.CurrencyRate"
+    ],
+    "columns": [
+      "Sales.CurrencyRate.CurrencyRateID",
+      "Sales.CurrencyRate.CurrencyRateDate",
+      "Sales.CurrencyRate.AverageRate"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_110",
+    "question": "Find currency exchange rates recorded on date 2011-05-31 in CurrencyRate.",
+    "sql": "SELECT CurrencyRateID, FromCurrencyCode, ToCurrencyCode, AverageRate FROM Sales.CurrencyRate WHERE CurrencyRateDate = '2011-05-31';",
+    "tables": [
+      "Sales.CurrencyRate"
+    ],
+    "columns": [
+      "Sales.CurrencyRate.CurrencyRateID",
+      "Sales.CurrencyRate.CurrencyRateDate",
+      "Sales.CurrencyRate.AverageRate"
+    ],
+    "concepts": [
+      "filtering",
+      "temporal"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_111",
+    "question": "Find shopping cart item details for cart ID '14237'.",
+    "sql": "SELECT ShoppingCartItemID, ShoppingCartID, Quantity, ProductID FROM Sales.ShoppingCartItem WHERE ShoppingCartID = '14237';",
+    "tables": [
+      "Sales.ShoppingCartItem"
+    ],
+    "columns": [
+      "Sales.ShoppingCartItem.ShoppingCartItemID",
+      "Sales.ShoppingCartItem.ShoppingCartID",
+      "Sales.ShoppingCartItem.ProductID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_112",
+    "question": "Find shopping cart item details for cart ID '14237'.",
+    "sql": "SELECT ShoppingCartItemID, ShoppingCartID, Quantity, ProductID FROM Sales.ShoppingCartItem WHERE ShoppingCartID = '14237';",
+    "tables": [
+      "Sales.ShoppingCartItem"
+    ],
+    "columns": [
+      "Sales.ShoppingCartItem.ShoppingCartItemID",
+      "Sales.ShoppingCartItem.ShoppingCartID",
+      "Sales.ShoppingCartItem.ProductID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_113",
+    "question": "Find shopping cart item details for cart ID '14237'.",
+    "sql": "SELECT ShoppingCartItemID, ShoppingCartID, Quantity, ProductID FROM Sales.ShoppingCartItem WHERE ShoppingCartID = '14237';",
+    "tables": [
+      "Sales.ShoppingCartItem"
+    ],
+    "columns": [
+      "Sales.ShoppingCartItem.ShoppingCartItemID",
+      "Sales.ShoppingCartItem.ShoppingCartID",
+      "Sales.ShoppingCartItem.ProductID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_114",
+    "question": "Find shopping cart item details for cart ID '14237'.",
+    "sql": "SELECT ShoppingCartItemID, ShoppingCartID, Quantity, ProductID FROM Sales.ShoppingCartItem WHERE ShoppingCartID = '14237';",
+    "tables": [
+      "Sales.ShoppingCartItem"
+    ],
+    "columns": [
+      "Sales.ShoppingCartItem.ShoppingCartItemID",
+      "Sales.ShoppingCartItem.ShoppingCartID",
+      "Sales.ShoppingCartItem.ProductID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_115",
+    "question": "Find shopping cart item details for cart ID '14237'.",
+    "sql": "SELECT ShoppingCartItemID, ShoppingCartID, Quantity, ProductID FROM Sales.ShoppingCartItem WHERE ShoppingCartID = '14237';",
+    "tables": [
+      "Sales.ShoppingCartItem"
+    ],
+    "columns": [
+      "Sales.ShoppingCartItem.ShoppingCartItemID",
+      "Sales.ShoppingCartItem.ShoppingCartID",
+      "Sales.ShoppingCartItem.ProductID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_116",
+    "question": "Find customer account numbers for customers in territory ID 6.",
+    "sql": "SELECT CustomerID, AccountNumber, TerritoryID FROM Sales.Customer WHERE TerritoryID = 6;",
+    "tables": [
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.Customer.AccountNumber",
+      "Sales.Customer.TerritoryID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_117",
+    "question": "Find customer account numbers for customers in territory ID 7.",
+    "sql": "SELECT CustomerID, AccountNumber, TerritoryID FROM Sales.Customer WHERE TerritoryID = 7;",
+    "tables": [
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.Customer.AccountNumber",
+      "Sales.Customer.TerritoryID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_118",
+    "question": "Find customer account numbers for customers in territory ID 8.",
+    "sql": "SELECT CustomerID, AccountNumber, TerritoryID FROM Sales.Customer WHERE TerritoryID = 8;",
+    "tables": [
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.Customer.AccountNumber",
+      "Sales.Customer.TerritoryID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_119",
+    "question": "Find customer account numbers for customers in territory ID 9.",
+    "sql": "SELECT CustomerID, AccountNumber, TerritoryID FROM Sales.Customer WHERE TerritoryID = 9;",
+    "tables": [
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.Customer.AccountNumber",
+      "Sales.Customer.TerritoryID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_120",
+    "question": "Find customer account numbers for customers in territory ID 10.",
+    "sql": "SELECT CustomerID, AccountNumber, TerritoryID FROM Sales.Customer WHERE TerritoryID = 10;",
+    "tables": [
+      "Sales.Customer"
+    ],
+    "columns": [
+      "Sales.Customer.CustomerID",
+      "Sales.Customer.AccountNumber",
+      "Sales.Customer.TerritoryID"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_121",
+    "question": "Find sales order headers where revision number equals 1.",
+    "sql": "SELECT SalesOrderID, RevisionNumber, OrderDate, TotalDue FROM Sales.SalesOrderHeader WHERE RevisionNumber = 1;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.RevisionNumber",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_122",
+    "question": "Find sales order headers where revision number equals 2.",
+    "sql": "SELECT SalesOrderID, RevisionNumber, OrderDate, TotalDue FROM Sales.SalesOrderHeader WHERE RevisionNumber = 2;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.RevisionNumber",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_123",
+    "question": "Find sales order headers where revision number equals 3.",
+    "sql": "SELECT SalesOrderID, RevisionNumber, OrderDate, TotalDue FROM Sales.SalesOrderHeader WHERE RevisionNumber = 3;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.RevisionNumber",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_124",
+    "question": "Find sales order headers where revision number equals 4.",
+    "sql": "SELECT SalesOrderID, RevisionNumber, OrderDate, TotalDue FROM Sales.SalesOrderHeader WHERE RevisionNumber = 4;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.RevisionNumber",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_125",
+    "question": "Find sales order headers where revision number equals 5.",
+    "sql": "SELECT SalesOrderID, RevisionNumber, OrderDate, TotalDue FROM Sales.SalesOrderHeader WHERE RevisionNumber = 5;",
+    "tables": [
+      "Sales.SalesOrderHeader"
+    ],
+    "columns": [
+      "Sales.SalesOrderHeader.SalesOrderID",
+      "Sales.SalesOrderHeader.RevisionNumber",
+      "Sales.SalesOrderHeader.TotalDue"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_126",
+    "question": "Find top 6 sales representatives ordered by bonus amount.",
+    "sql": "SELECT TOP 6 BusinessEntityID, Bonus, SalesYTD FROM Sales.SalesPerson ORDER BY Bonus DESC;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.Bonus",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_127",
+    "question": "Find top 7 sales representatives ordered by bonus amount.",
+    "sql": "SELECT TOP 7 BusinessEntityID, Bonus, SalesYTD FROM Sales.SalesPerson ORDER BY Bonus DESC;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.Bonus",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_128",
+    "question": "Find top 8 sales representatives ordered by bonus amount.",
+    "sql": "SELECT TOP 8 BusinessEntityID, Bonus, SalesYTD FROM Sales.SalesPerson ORDER BY Bonus DESC;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.Bonus",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_129",
+    "question": "Find top 9 sales representatives ordered by bonus amount.",
+    "sql": "SELECT TOP 9 BusinessEntityID, Bonus, SalesYTD FROM Sales.SalesPerson ORDER BY Bonus DESC;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.Bonus",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_130",
+    "question": "Find top 10 sales representatives ordered by bonus amount.",
+    "sql": "SELECT TOP 10 BusinessEntityID, Bonus, SalesYTD FROM Sales.SalesPerson ORDER BY Bonus DESC;",
+    "tables": [
+      "Sales.SalesPerson"
+    ],
+    "columns": [
+      "Sales.SalesPerson.BusinessEntityID",
+      "Sales.SalesPerson.Bonus",
+      "Sales.SalesPerson.SalesYTD"
+    ],
+    "concepts": [
+      "ranking",
+      "Top-N"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_131",
+    "question": "Find order details with UnitPrice discount greater than 0.02.",
+    "sql": "SELECT SalesOrderID, SalesOrderDetailID, UnitPrice, UnitPriceDiscount, LineTotal FROM Sales.SalesOrderDetail WHERE UnitPriceDiscount > 0.02;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SalesOrderID",
+      "Sales.SalesOrderDetail.UnitPriceDiscount",
+      "Sales.SalesOrderDetail.LineTotal"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_132",
+    "question": "Find order details with UnitPrice discount greater than 0.02.",
+    "sql": "SELECT SalesOrderID, SalesOrderDetailID, UnitPrice, UnitPriceDiscount, LineTotal FROM Sales.SalesOrderDetail WHERE UnitPriceDiscount > 0.02;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SalesOrderID",
+      "Sales.SalesOrderDetail.UnitPriceDiscount",
+      "Sales.SalesOrderDetail.LineTotal"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_133",
+    "question": "Find order details with UnitPrice discount greater than 0.02.",
+    "sql": "SELECT SalesOrderID, SalesOrderDetailID, UnitPrice, UnitPriceDiscount, LineTotal FROM Sales.SalesOrderDetail WHERE UnitPriceDiscount > 0.02;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SalesOrderID",
+      "Sales.SalesOrderDetail.UnitPriceDiscount",
+      "Sales.SalesOrderDetail.LineTotal"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_134",
+    "question": "Find order details with UnitPrice discount greater than 0.02.",
+    "sql": "SELECT SalesOrderID, SalesOrderDetailID, UnitPrice, UnitPriceDiscount, LineTotal FROM Sales.SalesOrderDetail WHERE UnitPriceDiscount > 0.02;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SalesOrderID",
+      "Sales.SalesOrderDetail.UnitPriceDiscount",
+      "Sales.SalesOrderDetail.LineTotal"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_135",
+    "question": "Find order details with UnitPrice discount greater than 0.02.",
+    "sql": "SELECT SalesOrderID, SalesOrderDetailID, UnitPrice, UnitPriceDiscount, LineTotal FROM Sales.SalesOrderDetail WHERE UnitPriceDiscount > 0.02;",
+    "tables": [
+      "Sales.SalesOrderDetail"
+    ],
+    "columns": [
+      "Sales.SalesOrderDetail.SalesOrderID",
+      "Sales.SalesOrderDetail.UnitPriceDiscount",
+      "Sales.SalesOrderDetail.LineTotal"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_136",
+    "question": "Find sales territory names for group 'North America'.",
+    "sql": "SELECT TerritoryID, Name, CountryRegionCode, SalesYTD FROM Sales.SalesTerritory WHERE [Group] = 'North America';",
+    "tables": [
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.TerritoryID",
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesTerritory.Group"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_137",
+    "question": "Find sales territory names for group 'North America'.",
+    "sql": "SELECT TerritoryID, Name, CountryRegionCode, SalesYTD FROM Sales.SalesTerritory WHERE [Group] = 'North America';",
+    "tables": [
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.TerritoryID",
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesTerritory.Group"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_138",
+    "question": "Find sales territory names for group 'North America'.",
+    "sql": "SELECT TerritoryID, Name, CountryRegionCode, SalesYTD FROM Sales.SalesTerritory WHERE [Group] = 'North America';",
+    "tables": [
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.TerritoryID",
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesTerritory.Group"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_139",
+    "question": "Find sales territory names for group 'North America'.",
+    "sql": "SELECT TerritoryID, Name, CountryRegionCode, SalesYTD FROM Sales.SalesTerritory WHERE [Group] = 'North America';",
+    "tables": [
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.TerritoryID",
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesTerritory.Group"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_140",
+    "question": "Find sales territory names for group 'North America'.",
+    "sql": "SELECT TerritoryID, Name, CountryRegionCode, SalesYTD FROM Sales.SalesTerritory WHERE [Group] = 'North America';",
+    "tables": [
+      "Sales.SalesTerritory"
+    ],
+    "columns": [
+      "Sales.SalesTerritory.TerritoryID",
+      "Sales.SalesTerritory.Name",
+      "Sales.SalesTerritory.Group"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_141",
+    "question": "Find credit card type 'SuperiorCard' details in CreditCard.",
+    "sql": "SELECT CreditCardID, CardType, ExpMonth, ExpYear FROM Sales.CreditCard WHERE CardType = 'SuperiorCard';",
+    "tables": [
+      "Sales.CreditCard"
+    ],
+    "columns": [
+      "Sales.CreditCard.CreditCardID",
+      "Sales.CreditCard.CardType"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_142",
+    "question": "Find credit card type 'SuperiorCard' details in CreditCard.",
+    "sql": "SELECT CreditCardID, CardType, ExpMonth, ExpYear FROM Sales.CreditCard WHERE CardType = 'SuperiorCard';",
+    "tables": [
+      "Sales.CreditCard"
+    ],
+    "columns": [
+      "Sales.CreditCard.CreditCardID",
+      "Sales.CreditCard.CardType"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_143",
+    "question": "Find credit card type 'SuperiorCard' details in CreditCard.",
+    "sql": "SELECT CreditCardID, CardType, ExpMonth, ExpYear FROM Sales.CreditCard WHERE CardType = 'SuperiorCard';",
+    "tables": [
+      "Sales.CreditCard"
+    ],
+    "columns": [
+      "Sales.CreditCard.CreditCardID",
+      "Sales.CreditCard.CardType"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_144",
+    "question": "Find credit card type 'SuperiorCard' details in CreditCard.",
+    "sql": "SELECT CreditCardID, CardType, ExpMonth, ExpYear FROM Sales.CreditCard WHERE CardType = 'SuperiorCard';",
+    "tables": [
+      "Sales.CreditCard"
+    ],
+    "columns": [
+      "Sales.CreditCard.CreditCardID",
+      "Sales.CreditCard.CardType"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_145",
+    "question": "Find credit card type 'SuperiorCard' details in CreditCard.",
+    "sql": "SELECT CreditCardID, CardType, ExpMonth, ExpYear FROM Sales.CreditCard WHERE CardType = 'SuperiorCard';",
+    "tables": [
+      "Sales.CreditCard"
+    ],
+    "columns": [
+      "Sales.CreditCard.CreditCardID",
+      "Sales.CreditCard.CardType"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_146",
+    "question": "Find special offer descriptions for offer category 'No Discount'.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, Type FROM Sales.SpecialOffer WHERE Type = 'No Discount';",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.Type"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_147",
+    "question": "Find special offer descriptions for offer category 'No Discount'.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, Type FROM Sales.SpecialOffer WHERE Type = 'No Discount';",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.Type"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_148",
+    "question": "Find special offer descriptions for offer category 'No Discount'.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, Type FROM Sales.SpecialOffer WHERE Type = 'No Discount';",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.Type"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_149",
+    "question": "Find special offer descriptions for offer category 'No Discount'.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, Type FROM Sales.SpecialOffer WHERE Type = 'No Discount';",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.Type"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "vq_150",
+    "question": "Find special offer descriptions for offer category 'No Discount'.",
+    "sql": "SELECT SpecialOfferID, Description, DiscountPct, Type FROM Sales.SpecialOffer WHERE Type = 'No Discount';",
+    "tables": [
+      "Sales.SpecialOffer"
+    ],
+    "columns": [
+      "Sales.SpecialOffer.SpecialOfferID",
+      "Sales.SpecialOffer.Description",
+      "Sales.SpecialOffer.Type"
+    ],
+    "concepts": [
+      "filtering"
+    ],
+    "difficulty": "easy"
+  }
+]

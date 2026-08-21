@@ -1,0 +1,201 @@
+{
+  "schema": "Sales",
+  "version": "1.0.0",
+  "description": "Comprehensive business rules and anti-hallucination guidelines for all 19 tables in the Sales schema.",
+  "global_anti_hallucination_rules": [
+    "Use only tables and columns explicitly present in the Sales schema context.",
+    "Do not invent external tables or schemas (such as Production.Product, Person.Person, Purchasing.Vendor) unless they are provided in the prompt.",
+    "Always use fully qualified table names (e.g. Sales.SalesOrderHeader, Sales.SalesOrderDetail).",
+    "Never execute DML/DDL statements (INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE, EXEC). Generate read-only SELECT queries only.",
+    "Never use LIMIT syntax; SQL Server requires TOP N or OFFSET-FETCH."
+  ],
+  "table_business_rules": {
+    "Sales.SalesOrderHeader": {
+      "grain": "one row per sales order",
+      "primary_key": ["SalesOrderID"],
+      "financial_rules": {
+        "SubTotal": "Pure merchandise revenue before tax and freight. SUM(SubTotal) represents Revenue / Sales Revenue.",
+        "TotalDue": "Grand total charged to customer (SubTotal + TaxAmt + Freight). Use SUM(TotalDue) when user explicitly asks for Total Due, Amount Due, or Total Customer Charge.",
+        "TaxAmt": "Sales tax collected. SUM(TaxAmt) represents Tax Collected.",
+        "Freight": "Shipping/freight charges. SUM(Freight) represents Freight Charges."
+      },
+      "status_enum": {
+        "1": "In process",
+        "2": "Approved",
+        "3": "Backordered",
+        "4": "Rejected",
+        "5": "Shipped",
+        "6": "Cancelled"
+      },
+      "channel_enum": {
+        "0": "Order placed offline by sales representative",
+        "1": "Order placed online directly by customer"
+      },
+      "anti_hallucination_guidance": [
+        "TerritoryID is directly present on SalesOrderHeader. Do not join Sales.SalesTerritory unless territory names or regional groups are explicitly requested.",
+        "Do not sum header-level financial fields (SubTotal, TotalDue, TaxAmt, Freight) after joining to SalesOrderDetail without grouping by SalesOrderID first."
+      ]
+    },
+    "Sales.SalesOrderDetail": {
+      "grain": "one row per product line within a sales order",
+      "primary_key": ["SalesOrderID", "SalesOrderDetailID"],
+      "financial_rules": {
+        "OrderQty": "Quantity of product ordered. SUM(OrderQty) represents Units Sold.",
+        "UnitPrice": "Unit selling price of a single product item. Never sum UnitPrice directly; use AVG(UnitPrice).",
+        "UnitPriceDiscount": "Discount rate fraction (e.g., 0.10 represents a 10% discount). Never sum UnitPriceDiscount; use AVG(UnitPriceDiscount).",
+        "LineTotal": "Computed per product subtotal: UnitPrice * (1 - UnitPriceDiscount) * OrderQty."
+      },
+      "anti_hallucination_guidance": [
+        "SalesOrderDetail does NOT contain SubTotal, TotalDue, TaxAmt, or Freight. Use LineTotal for line-item product sales value.",
+        "SalesOrderDetail joins to SalesOrderHeader on SalesOrderID."
+      ]
+    },
+    "Sales.Customer": {
+      "grain": "one row per customer account",
+      "primary_key": ["CustomerID"],
+      "account_types": {
+        "PersonID": "Refers to individual consumer accounts (links to Person.Person).",
+        "StoreID": "Refers to corporate reseller or retail store accounts (links to Sales.Store)."
+      },
+      "anti_hallucination_guidance": [
+        "CustomerID is the primary key for sales orders in SalesOrderHeader.",
+        "Do not join Person.Person or Sales.Store unless customer personal names or store names are explicitly requested."
+      ]
+    },
+    "Sales.Store": {
+      "grain": "one row per store reseller account",
+      "primary_key": ["BusinessEntityID"],
+      "rules": [
+        "BusinessEntityID links to Customer.StoreID.",
+        "SalesPersonID links to the assigned SalesPerson who handles the account.",
+        "Demographics column contains XML-encoded store survey data."
+      ]
+    },
+    "Sales.SalesPerson": {
+      "grain": "one row per sales representative",
+      "primary_key": ["BusinessEntityID"],
+      "performance_metrics": {
+        "SalesQuota": "Target sales quota amount.",
+        "Bonus": "Bonus amount earned.",
+        "CommissionPct": "Commission percentage rate fraction (e.g. 0.015 = 1.5%).",
+        "SalesYTD": "Year-to-date total sales achieved by the representative.",
+        "SalesLastYear": "Previous year total sales achieved by the representative."
+      },
+      "anti_hallucination_guidance": [
+        "BusinessEntityID is the primary key identifying the sales person (links to SalesOrderHeader.SalesPersonID)."
+      ]
+    },
+    "Sales.SalesTerritory": {
+      "grain": "one row per sales territory region",
+      "primary_key": ["TerritoryID"],
+      "geographic_grouping": {
+        "Group": "Geographic continent/group (e.g., North America, Europe, Pacific).",
+        "CountryRegionCode": "ISO Country/Region code (e.g., US, CA, FR, DE, AU)."
+      },
+      "performance_metrics": {
+        "SalesYTD": "Aggregated year-to-date sales for the territory.",
+        "SalesLastYear": "Aggregated previous year sales for the territory."
+      }
+    },
+    "Sales.SpecialOffer": {
+      "grain": "one row per promotional special offer",
+      "primary_key": ["SpecialOfferID"],
+      "discount_rules": {
+        "DiscountPct": "Promotional discount percentage rate (e.g. 0.15 = 15%).",
+        "Type": "Category of offer (e.g. Volume Discount, Excess Inventory, Discontinued, Season Discount).",
+        "Category": "Reseller or Customer promotional target."
+      }
+    },
+    "Sales.SpecialOfferProduct": {
+      "grain": "one row per product mapped to a special offer",
+      "primary_key": ["SpecialOfferID", "ProductID"],
+      "anti_hallucination_guidance": [
+        "Acts as a bridge table linking promotions in SpecialOffer to item line details in SalesOrderDetail on (SpecialOfferID, ProductID)."
+      ]
+    },
+    "Sales.CreditCard": {
+      "grain": "one row per credit card",
+      "primary_key": ["CreditCardID"],
+      "rules": [
+        "CardType stores card brand (Vista, SuperiorCard, Distinguish, ColonialVoice).",
+        "CardNumber stores masked card number."
+      ]
+    },
+    "Sales.PersonCreditCard": {
+      "grain": "one row per person credit card mapping",
+      "primary_key": ["BusinessEntityID", "CreditCardID"],
+      "rules": [
+        "Maps individual customer persons (BusinessEntityID) to their stored payment cards (CreditCardID)."
+      ]
+    },
+    "Sales.Currency": {
+      "grain": "one row per currency code",
+      "primary_key": ["CurrencyCode"],
+      "rules": [
+        "CurrencyCode stores ISO 3-letter currency abbreviation (USD, EUR, CAD, AUD, GBP)."
+      ]
+    },
+    "Sales.CurrencyRate": {
+      "grain": "one row per currency exchange rate per date",
+      "primary_key": ["CurrencyRateID"],
+      "rules": [
+        "FromCurrencyCode and ToCurrencyCode identify source and target conversion currencies.",
+        "AverageRate and EndOfDayRate represent conversion multipliers.",
+        "CurrencyRateID links to SalesOrderHeader.CurrencyRateID."
+      ]
+    },
+    "Sales.CountryRegionCurrency": {
+      "grain": "one row per country region and currency mapping",
+      "primary_key": ["CountryRegionCode", "CurrencyCode"],
+      "rules": [
+        "Maps geographic countries to their official local trading currency."
+      ]
+    },
+    "Sales.SalesReason": {
+      "grain": "one row per sales reason category",
+      "primary_key": ["SalesReasonID"],
+      "rules": [
+        "ReasonType categorizes order purchase reasons (e.g. Marketing, Promotion, Other)."
+      ]
+    },
+    "Sales.SalesOrderHeaderSalesReason": {
+      "grain": "one row per sales order and sales reason association",
+      "primary_key": ["SalesOrderID", "SalesReasonID"],
+      "rules": [
+        "Bridge table linking SalesOrderHeader to SalesReason."
+      ]
+    },
+    "Sales.SalesPersonQuotaHistory": {
+      "grain": "one row per sales quota entry per date for a sales representative",
+      "primary_key": ["BusinessEntityID", "QuotaDate"],
+      "rules": [
+        "Tracks historical quota changes set for sales representatives over time."
+      ]
+    },
+    "Sales.SalesTerritoryHistory": {
+      "grain": "one row per sales representative territory assignment period",
+      "primary_key": ["BusinessEntityID", "TerritoryID", "StartDate"],
+      "rules": [
+        "Tracks historical assignment of sales representatives to sales territories.",
+        "A NULL EndDate indicates the representative's currently active territory."
+      ]
+    },
+    "Sales.SalesTaxRate": {
+      "grain": "one row per sales tax rate rule per state or province",
+      "primary_key": ["SalesTaxRateID"],
+      "tax_types": {
+        "1": "State tax",
+        "2": "County tax",
+        "3": "City tax"
+      }
+    },
+    "Sales.ShoppingCartItem": {
+      "grain": "one row per shopping cart line item",
+      "primary_key": ["ShoppingCartItemID"],
+      "rules": [
+        "Stores unpurchased pending cart items.",
+        "Do NOT join ShoppingCartItem to SalesOrderHeader or SalesOrderDetail as cart items are uncommitted web sessions."
+      ]
+    }
+  }
+}

@@ -1,0 +1,4396 @@
+{
+  "schema": "Sales",
+  "business_definition": "Sales management schema containing 19 tables covering customer orders, sales territories, sales representatives, credit cards, currencies, special offers, and store accounts.",
+  "tables": [
+    {
+      "name": "CountryRegionCurrency",
+      "qualified_name": "Sales.CountryRegionCurrency",
+      "grain": "one row per country region and currency mapping",
+      "primary_key": [
+        "CountryRegionCode",
+        "CurrencyCode"
+      ],
+      "synonyms": [
+        "country region currency"
+      ],
+      "business_definition": "Maps country regions to their corresponding currency codes.",
+      "description": "Cross-reference table mapping ISO currency codes to a country or region.",
+      "columns": [
+        {
+          "name": "CountryRegionCode",
+          "qualified_name": "Sales.CountryRegionCurrency.CountryRegionCode",
+          "data_type": "nvarchar(3)",
+          "nullable": false,
+          "primary_key": true,
+          "description": "ISO code for countries and regions. Foreign key to CountryRegion.CountryRegionCode.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "country region code"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CurrencyCode",
+          "qualified_name": "Sales.CountryRegionCurrency.CurrencyCode",
+          "data_type": "nchar(3)",
+          "nullable": false,
+          "primary_key": true,
+          "description": "ISO standard currency code. Foreign key to Currency.CurrencyCode.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "currency code"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.CountryRegionCurrency.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CreditCard",
+      "qualified_name": "Sales.CreditCard",
+      "grain": "one row per credit card",
+      "primary_key": [
+        "CreditCardID"
+      ],
+      "synonyms": [
+        "credit card"
+      ],
+      "business_definition": "Customer credit card record storing card type, card number, and expiration date.",
+      "description": "Customer credit card information.",
+      "columns": [
+        {
+          "name": "CreditCardID",
+          "qualified_name": "Sales.CreditCard.CreditCardID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key for CreditCard records.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "credit card id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CardType",
+          "qualified_name": "Sales.CreditCard.CardType",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Credit card name.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "card type"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CardNumber",
+          "qualified_name": "Sales.CreditCard.CardNumber",
+          "data_type": "nvarchar(25)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Credit card number.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "card number"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ExpMonth",
+          "qualified_name": "Sales.CreditCard.ExpMonth",
+          "data_type": "tinyint",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Credit card expiration month.",
+          "semantic_type": "dimension",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "exp month"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ExpYear",
+          "qualified_name": "Sales.CreditCard.ExpYear",
+          "data_type": "smallint",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Credit card expiration year.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "exp year"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.CreditCard.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Currency",
+      "qualified_name": "Sales.Currency",
+      "grain": "one row per currency",
+      "primary_key": [
+        "CurrencyCode"
+      ],
+      "synonyms": [
+        "currency"
+      ],
+      "business_definition": "Currency codes and names used for financial transactions.",
+      "description": "Lookup table containing standard ISO currencies.",
+      "columns": [
+        {
+          "name": "CurrencyCode",
+          "qualified_name": "Sales.Currency.CurrencyCode",
+          "data_type": "nchar(3)",
+          "nullable": false,
+          "primary_key": true,
+          "description": "The ISO code for the Currency.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "currency code"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Name",
+          "qualified_name": "Sales.Currency.Name",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Currency name.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "name"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.Currency.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CurrencyRate",
+      "qualified_name": "Sales.CurrencyRate",
+      "grain": "one row per currency exchange rate entry per date",
+      "primary_key": [
+        "CurrencyRateID"
+      ],
+      "synonyms": [
+        "currency rate"
+      ],
+      "business_definition": "Daily exchange rates between different currencies.",
+      "description": "Currency exchange rates.",
+      "columns": [
+        {
+          "name": "CurrencyRateID",
+          "qualified_name": "Sales.CurrencyRate.CurrencyRateID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key for CurrencyRate records.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "currency rate id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CurrencyRateDate",
+          "qualified_name": "Sales.CurrencyRate.CurrencyRateDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the exchange rate was obtained.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "currency rate date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "FromCurrencyCode",
+          "qualified_name": "Sales.CurrencyRate.FromCurrencyCode",
+          "data_type": "nchar(3)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Exchange rate was converted from this currency code.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "from currency code"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ToCurrencyCode",
+          "qualified_name": "Sales.CurrencyRate.ToCurrencyCode",
+          "data_type": "nchar(3)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Exchange rate was converted to this currency code.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "to currency code"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "AverageRate",
+          "qualified_name": "Sales.CurrencyRate.AverageRate",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Average exchange rate for the day.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "average rate"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "EndOfDayRate",
+          "qualified_name": "Sales.CurrencyRate.EndOfDayRate",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Final exchange rate for the day.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "end of day rate"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.CurrencyRate.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "qualified_name": "Sales.Customer",
+      "grain": "one row per customer account",
+      "primary_key": [
+        "CustomerID"
+      ],
+      "synonyms": [
+        "customer"
+      ],
+      "business_definition": "Customer accounts associated with store or individual buyers.",
+      "description": "Current customer information. Also see the Person and Store tables.",
+      "columns": [
+        {
+          "name": "CustomerID",
+          "qualified_name": "Sales.Customer.CustomerID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "customer id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "PersonID",
+          "qualified_name": "Sales.Customer.PersonID",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Foreign key to Person.BusinessEntityID",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "person id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "StoreID",
+          "qualified_name": "Sales.Customer.StoreID",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Foreign key to Store.BusinessEntityID",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "store id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "TerritoryID",
+          "qualified_name": "Sales.Customer.TerritoryID",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "ID of the territory in which the customer is located. Foreign key to SalesTerritory.SalesTerritoryID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "territory id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "AccountNumber",
+          "qualified_name": "Sales.Customer.AccountNumber",
+          "data_type": "varchar(10)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Unique number identifying the customer assigned by the accounting system.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "account number"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.Customer.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.Customer.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PersonCreditCard",
+      "qualified_name": "Sales.PersonCreditCard",
+      "grain": "one row per person credit card mapping",
+      "primary_key": [
+        "BusinessEntityID",
+        "CreditCardID"
+      ],
+      "synonyms": [
+        "person credit card"
+      ],
+      "business_definition": "Cross-reference table mapping individual persons to their credit cards.",
+      "description": "Cross-reference table mapping people to their credit card information in the CreditCard table. ",
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "qualified_name": "Sales.PersonCreditCard.BusinessEntityID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Business entity identification number. Foreign key to Person.BusinessEntityID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "business entity id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CreditCardID",
+          "qualified_name": "Sales.PersonCreditCard.CreditCardID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Credit card identification number. Foreign key to CreditCard.CreditCardID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "credit card id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.PersonCreditCard.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesOrderDetail",
+      "qualified_name": "Sales.SalesOrderDetail",
+      "grain": "one row per product line within a sales order",
+      "primary_key": [
+        "SalesOrderID",
+        "SalesOrderDetailID"
+      ],
+      "synonyms": [
+        "sales order detail"
+      ],
+      "business_definition": "Individual product line items associated with each sales order.",
+      "description": "Individual products associated with a specific sales order. See SalesOrderHeader.",
+      "columns": [
+        {
+          "name": "SalesOrderID",
+          "qualified_name": "Sales.SalesOrderDetail.SalesOrderID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key. Foreign key to SalesOrderHeader.SalesOrderID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "sales order id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SalesOrderDetailID",
+          "qualified_name": "Sales.SalesOrderDetail.SalesOrderDetailID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key. One incremental unique number per product sold.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "sales order detail id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CarrierTrackingNumber",
+          "qualified_name": "Sales.SalesOrderDetail.CarrierTrackingNumber",
+          "data_type": "nvarchar(25)",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Shipment tracking number supplied by the shipper.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "carrier tracking number"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "OrderQty",
+          "qualified_name": "Sales.SalesOrderDetail.OrderQty",
+          "data_type": "smallint",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Quantity ordered per product.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "order qty"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "ProductID",
+          "qualified_name": "Sales.SalesOrderDetail.ProductID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Product sold to customer. Foreign key to Product.ProductID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "product id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SpecialOfferID",
+          "qualified_name": "Sales.SalesOrderDetail.SpecialOfferID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Promotional code. Foreign key to SpecialOffer.SpecialOfferID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "special offer id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "UnitPrice",
+          "qualified_name": "Sales.SalesOrderDetail.UnitPrice",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Selling price of a single product.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "unit price"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "UnitPriceDiscount",
+          "qualified_name": "Sales.SalesOrderDetail.UnitPriceDiscount",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Discount amount.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "unit price discount"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "AVG",
+            "MIN",
+            "MAX"
+          ],
+          "business_definition": "Discount rate applied to UnitPrice. For example, 0.10 represents a 10% discount."
+        },
+        {
+          "name": "LineTotal",
+          "qualified_name": "Sales.SalesOrderDetail.LineTotal",
+          "data_type": "numeric(38,6)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Per product subtotal. Computed as UnitPrice * (1 - UnitPriceDiscount) * OrderQty.",
+          "semantic_type": "dimension",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "line total"
+          ],
+          "physical_computed_column": true,
+          "business_derivation": "UnitPrice * (1 - UnitPriceDiscount) * OrderQty",
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.SalesOrderDetail.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SalesOrderDetail.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesOrderHeader",
+      "qualified_name": "Sales.SalesOrderHeader",
+      "grain": "one row per sales order",
+      "primary_key": [
+        "SalesOrderID"
+      ],
+      "synonyms": [
+        "sales order header"
+      ],
+      "business_definition": "General sales order header transaction records.",
+      "description": "General sales order information.",
+      "columns": [
+        {
+          "name": "SalesOrderID",
+          "qualified_name": "Sales.SalesOrderHeader.SalesOrderID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "sales order id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "RevisionNumber",
+          "qualified_name": "Sales.SalesOrderHeader.RevisionNumber",
+          "data_type": "tinyint",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Incremental number to track changes to the sales order over time.",
+          "semantic_type": "dimension",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "revision number"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "OrderDate",
+          "qualified_name": "Sales.SalesOrderHeader.OrderDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Dates the sales order was created.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "order date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "DueDate",
+          "qualified_name": "Sales.SalesOrderHeader.DueDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date the order is due to the customer.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "due date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "ShipDate",
+          "qualified_name": "Sales.SalesOrderHeader.ShipDate",
+          "data_type": "datetime",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Date the order was shipped to the customer.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "ship date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "Status",
+          "qualified_name": "Sales.SalesOrderHeader.Status",
+          "data_type": "tinyint",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Order current status. 1 = In process; 2 = Approved; 3 = Backordered; 4 = Rejected; 5 = Shipped; 6 = Cancelled",
+          "semantic_type": "dimension",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "status"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {
+            "1": "In process",
+            "2": "Approved",
+            "3": "Backordered",
+            "4": "Rejected",
+            "5": "Shipped",
+            "6": "Cancelled"
+          },
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "OnlineOrderFlag",
+          "qualified_name": "Sales.SalesOrderHeader.OnlineOrderFlag",
+          "data_type": "bit",
+          "nullable": false,
+          "primary_key": false,
+          "description": "0 = Order placed by sales person. 1 = Order placed online by customer.",
+          "semantic_type": "boolean",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "online order flag"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {
+            "0": "Order placed by sales person",
+            "1": "Order placed online by customer"
+          },
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SalesOrderNumber",
+          "qualified_name": "Sales.SalesOrderHeader.SalesOrderNumber",
+          "data_type": "nvarchar(25)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Unique sales order identification number.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "sales order number"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "PurchaseOrderNumber",
+          "qualified_name": "Sales.SalesOrderHeader.PurchaseOrderNumber",
+          "data_type": "nvarchar(25)",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Customer purchase order number reference. ",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "purchase order number"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "AccountNumber",
+          "qualified_name": "Sales.SalesOrderHeader.AccountNumber",
+          "data_type": "nvarchar(15)",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Financial accounting number reference.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "account number"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CustomerID",
+          "qualified_name": "Sales.SalesOrderHeader.CustomerID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Customer identification number. Foreign key to Customer.BusinessEntityID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "customer id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SalesPersonID",
+          "qualified_name": "Sales.SalesOrderHeader.SalesPersonID",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Sales person who created the sales order. Foreign key to SalesPerson.BusinessEntityID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "sales person id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "TerritoryID",
+          "qualified_name": "Sales.SalesOrderHeader.TerritoryID",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Territory in which the sale was made. Foreign key to SalesTerritory.SalesTerritoryID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "territory id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "BillToAddressID",
+          "qualified_name": "Sales.SalesOrderHeader.BillToAddressID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Customer billing address. Foreign key to Address.AddressID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "bill to address id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ShipToAddressID",
+          "qualified_name": "Sales.SalesOrderHeader.ShipToAddressID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Customer shipping address. Foreign key to Address.AddressID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "ship to address id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ShipMethodID",
+          "qualified_name": "Sales.SalesOrderHeader.ShipMethodID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Shipping method. Foreign key to ShipMethod.ShipMethodID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "ship method id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CreditCardID",
+          "qualified_name": "Sales.SalesOrderHeader.CreditCardID",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Credit card identification number. Foreign key to CreditCard.CreditCardID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "credit card id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CreditCardApprovalCode",
+          "qualified_name": "Sales.SalesOrderHeader.CreditCardApprovalCode",
+          "data_type": "varchar(15)",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Approval code provided by the credit card company.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "credit card approval code"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CurrencyRateID",
+          "qualified_name": "Sales.SalesOrderHeader.CurrencyRateID",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Currency exchange rate used. Foreign key to CurrencyRate.CurrencyRateID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "currency rate id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SubTotal",
+          "qualified_name": "Sales.SalesOrderHeader.SubTotal",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Sales subtotal. Computed as SUM(SalesOrderDetail.LineTotal)for the appropriate SalesOrderID.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "sub total"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": "SUM(Sales.SalesOrderDetail.LineTotal) for the corresponding SalesOrderID",
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "TaxAmt",
+          "qualified_name": "Sales.SalesOrderHeader.TaxAmt",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Tax amount.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "tax amt"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "Freight",
+          "qualified_name": "Sales.SalesOrderHeader.Freight",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Shipping cost.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "freight"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "TotalDue",
+          "qualified_name": "Sales.SalesOrderHeader.TotalDue",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Total due from customer. Computed as Subtotal + TaxAmt + Freight.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "total due"
+          ],
+          "physical_computed_column": true,
+          "business_derivation": "SubTotal + TaxAmt + Freight",
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "Comment",
+          "qualified_name": "Sales.SalesOrderHeader.Comment",
+          "data_type": "nvarchar(128)",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Sales representative comments.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "comment"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.SalesOrderHeader.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SalesOrderHeader.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesOrderHeaderSalesReason",
+      "qualified_name": "Sales.SalesOrderHeaderSalesReason",
+      "grain": "one row per sales order and sales reason mapping",
+      "primary_key": [
+        "SalesOrderID",
+        "SalesReasonID"
+      ],
+      "synonyms": [
+        "sales order header sales reason"
+      ],
+      "business_definition": "Cross-reference table linking sales order headers to sales reasons.",
+      "description": "Cross-reference table mapping sales orders to sales reason codes.",
+      "columns": [
+        {
+          "name": "SalesOrderID",
+          "qualified_name": "Sales.SalesOrderHeaderSalesReason.SalesOrderID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key. Foreign key to SalesOrderHeader.SalesOrderID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "sales order id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SalesReasonID",
+          "qualified_name": "Sales.SalesOrderHeaderSalesReason.SalesReasonID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key. Foreign key to SalesReason.SalesReasonID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "sales reason id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SalesOrderHeaderSalesReason.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesPerson",
+      "qualified_name": "Sales.SalesPerson",
+      "grain": "one row per sales representative",
+      "primary_key": [
+        "BusinessEntityID"
+      ],
+      "synonyms": [
+        "sales person"
+      ],
+      "business_definition": "Sales representative performance, quota, and territory information.",
+      "description": "Sales representative current information.",
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "qualified_name": "Sales.SalesPerson.BusinessEntityID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key for SalesPerson records. Foreign key to Employee.BusinessEntityID",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "business entity id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "TerritoryID",
+          "qualified_name": "Sales.SalesPerson.TerritoryID",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Territory currently assigned to. Foreign key to SalesTerritory.SalesTerritoryID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "territory id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SalesQuota",
+          "qualified_name": "Sales.SalesPerson.SalesQuota",
+          "data_type": "money",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Projected yearly sales.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "sales quota"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "Bonus",
+          "qualified_name": "Sales.SalesPerson.Bonus",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Bonus due if quota is met.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "bonus"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "CommissionPct",
+          "qualified_name": "Sales.SalesPerson.CommissionPct",
+          "data_type": "smallmoney",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Commision percent received per sale.",
+          "semantic_type": "dimension",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "commission pct"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SalesYTD",
+          "qualified_name": "Sales.SalesPerson.SalesYTD",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Sales total year to date.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "sales ytd"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "SalesLastYear",
+          "qualified_name": "Sales.SalesPerson.SalesLastYear",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Sales total of previous year.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "sales last year"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.SalesPerson.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SalesPerson.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesPersonQuotaHistory",
+      "qualified_name": "Sales.SalesPersonQuotaHistory",
+      "grain": "one row per sales quota entry per date for a sales representative",
+      "primary_key": [
+        "BusinessEntityID",
+        "QuotaDate"
+      ],
+      "synonyms": [
+        "sales person quota history"
+      ],
+      "business_definition": "Historical record of sales representative quota changes over time.",
+      "description": "Sales performance tracking.",
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "qualified_name": "Sales.SalesPersonQuotaHistory.BusinessEntityID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Sales person identification number. Foreign key to SalesPerson.BusinessEntityID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "business entity id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "QuotaDate",
+          "qualified_name": "Sales.SalesPersonQuotaHistory.QuotaDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Sales quota date.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "quota date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SalesQuota",
+          "qualified_name": "Sales.SalesPersonQuotaHistory.SalesQuota",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Sales quota amount.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "sales quota"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.SalesPersonQuotaHistory.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SalesPersonQuotaHistory.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesReason",
+      "qualified_name": "Sales.SalesReason",
+      "grain": "one row per sales reason",
+      "primary_key": [
+        "SalesReasonID"
+      ],
+      "synonyms": [
+        "sales reason"
+      ],
+      "business_definition": "Categorized reasons for placing sales orders.",
+      "description": "Lookup table of customer purchase reasons.",
+      "columns": [
+        {
+          "name": "SalesReasonID",
+          "qualified_name": "Sales.SalesReason.SalesReasonID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key for SalesReason records.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "sales reason id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Name",
+          "qualified_name": "Sales.SalesReason.Name",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Sales reason description.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "name"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ReasonType",
+          "qualified_name": "Sales.SalesReason.ReasonType",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Category the sales reason belongs to.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "reason type"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SalesReason.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesTaxRate",
+      "qualified_name": "Sales.SalesTaxRate",
+      "grain": "one row per sales tax rate per state or province",
+      "primary_key": [
+        "SalesTaxRateID"
+      ],
+      "synonyms": [
+        "sales tax rate"
+      ],
+      "business_definition": "Tax rates for specific state or province locations.",
+      "description": "Tax rate lookup table.",
+      "columns": [
+        {
+          "name": "SalesTaxRateID",
+          "qualified_name": "Sales.SalesTaxRate.SalesTaxRateID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key for SalesTaxRate records.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "sales tax rate id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "StateProvinceID",
+          "qualified_name": "Sales.SalesTaxRate.StateProvinceID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "State, province, or country/region the sales tax applies to.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "state province id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "TaxType",
+          "qualified_name": "Sales.SalesTaxRate.TaxType",
+          "data_type": "tinyint",
+          "nullable": false,
+          "primary_key": false,
+          "description": "1 = Tax applied to retail transactions, 2 = Tax applied to wholesale transactions, 3 = Tax applied to all sales (retail and wholesale) transactions.",
+          "semantic_type": "dimension",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "tax type"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "TaxRate",
+          "qualified_name": "Sales.SalesTaxRate.TaxRate",
+          "data_type": "smallmoney",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Tax rate amount.",
+          "semantic_type": "dimension",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "tax rate"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Name",
+          "qualified_name": "Sales.SalesTaxRate.Name",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Tax rate description.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "name"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.SalesTaxRate.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SalesTaxRate.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesTerritory",
+      "qualified_name": "Sales.SalesTerritory",
+      "grain": "one row per sales territory",
+      "primary_key": [
+        "TerritoryID"
+      ],
+      "synonyms": [
+        "sales territory"
+      ],
+      "business_definition": "Sales territory regions, groups, and historical sales performance metrics.",
+      "description": "Sales territory lookup table.",
+      "columns": [
+        {
+          "name": "TerritoryID",
+          "qualified_name": "Sales.SalesTerritory.TerritoryID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key for SalesTerritory records.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "territory id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Name",
+          "qualified_name": "Sales.SalesTerritory.Name",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Sales territory description",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "name"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "CountryRegionCode",
+          "qualified_name": "Sales.SalesTerritory.CountryRegionCode",
+          "data_type": "nvarchar(3)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ISO standard country or region code. Foreign key to CountryRegion.CountryRegionCode. ",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "country region code"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Group",
+          "qualified_name": "Sales.SalesTerritory.Group",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Geographic area to which the sales territory belong.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "group"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SalesYTD",
+          "qualified_name": "Sales.SalesTerritory.SalesYTD",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Sales in the territory year to date.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "sales ytd"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "SalesLastYear",
+          "qualified_name": "Sales.SalesTerritory.SalesLastYear",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Sales in the territory the previous year.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "sales last year"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "CostYTD",
+          "qualified_name": "Sales.SalesTerritory.CostYTD",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Business costs in the territory year to date.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "cost ytd"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "CostLastYear",
+          "qualified_name": "Sales.SalesTerritory.CostLastYear",
+          "data_type": "money",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Business costs in the territory the previous year.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "cost last year"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.SalesTerritory.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SalesTerritory.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesTerritoryHistory",
+      "qualified_name": "Sales.SalesTerritoryHistory",
+      "grain": "one row per sales representative territory assignment period",
+      "primary_key": [
+        "BusinessEntityID",
+        "TerritoryID",
+        "StartDate"
+      ],
+      "synonyms": [
+        "sales territory history"
+      ],
+      "business_definition": "Historical assignment of sales representatives to sales territories over time.",
+      "description": "Sales representative transfers to other sales territories.",
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "qualified_name": "Sales.SalesTerritoryHistory.BusinessEntityID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key. The sales rep.  Foreign key to SalesPerson.BusinessEntityID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "business entity id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "TerritoryID",
+          "qualified_name": "Sales.SalesTerritoryHistory.TerritoryID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key. Territory identification number. Foreign key to SalesTerritory.SalesTerritoryID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "territory id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "StartDate",
+          "qualified_name": "Sales.SalesTerritoryHistory.StartDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key. Date the sales representive started work in the territory.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "start date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "EndDate",
+          "qualified_name": "Sales.SalesTerritoryHistory.EndDate",
+          "data_type": "datetime",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Date the sales representative left work in the territory.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "end date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.SalesTerritoryHistory.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SalesTerritoryHistory.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ShoppingCartItem",
+      "qualified_name": "Sales.ShoppingCartItem",
+      "grain": "one row per shopping cart line item",
+      "primary_key": [
+        "ShoppingCartItemID"
+      ],
+      "synonyms": [
+        "shopping cart item"
+      ],
+      "business_definition": "Individual items currently stored in customer shopping carts.",
+      "description": "Contains online customer orders until the order is submitted or cancelled.",
+      "columns": [
+        {
+          "name": "ShoppingCartItemID",
+          "qualified_name": "Sales.ShoppingCartItem.ShoppingCartItemID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key for ShoppingCartItem records.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "shopping cart item id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ShoppingCartID",
+          "qualified_name": "Sales.ShoppingCartItem.ShoppingCartID",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Shopping cart identification number.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "shopping cart id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Quantity",
+          "qualified_name": "Sales.ShoppingCartItem.Quantity",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Product quantity ordered.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "quantity"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "ProductID",
+          "qualified_name": "Sales.ShoppingCartItem.ProductID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Product ordered. Foreign key to Product.ProductID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "product id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "DateCreated",
+          "qualified_name": "Sales.ShoppingCartItem.DateCreated",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date the time the record was created.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "date created"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.ShoppingCartItem.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SpecialOffer",
+      "qualified_name": "Sales.SpecialOffer",
+      "grain": "one row per special offer or promotional discount",
+      "primary_key": [
+        "SpecialOfferID"
+      ],
+      "synonyms": [
+        "special offer"
+      ],
+      "business_definition": "Promotional discounts, special offers, and offer validity periods.",
+      "description": "Sale discounts lookup table.",
+      "columns": [
+        {
+          "name": "SpecialOfferID",
+          "qualified_name": "Sales.SpecialOffer.SpecialOfferID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key for SpecialOffer records.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "special offer id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Description",
+          "qualified_name": "Sales.SpecialOffer.Description",
+          "data_type": "nvarchar(255)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Discount description.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "description"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "DiscountPct",
+          "qualified_name": "Sales.SpecialOffer.DiscountPct",
+          "data_type": "smallmoney",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Discount precentage.",
+          "semantic_type": "dimension",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "discount pct"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Type",
+          "qualified_name": "Sales.SpecialOffer.Type",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Discount type category.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "type"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Category",
+          "qualified_name": "Sales.SpecialOffer.Category",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Group the discount applies to such as Reseller or Customer.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "category"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "StartDate",
+          "qualified_name": "Sales.SpecialOffer.StartDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Discount start date.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "start date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "EndDate",
+          "qualified_name": "Sales.SpecialOffer.EndDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Discount end date.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "end date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "MinQty",
+          "qualified_name": "Sales.SpecialOffer.MinQty",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Minimum discount percent allowed.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "min qty"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "MaxQty",
+          "qualified_name": "Sales.SpecialOffer.MaxQty",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Maximum discount percent allowed.",
+          "semantic_type": "measure",
+          "analytical_role": "measure",
+          "synonyms": [
+            "max qty"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": true
+          },
+          "preferred_aggregations": [
+            "SUM",
+            "AVG",
+            "MIN",
+            "MAX"
+          ]
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.SpecialOffer.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SpecialOffer.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SpecialOfferProduct",
+      "qualified_name": "Sales.SpecialOfferProduct",
+      "grain": "one row per product associated with a special offer",
+      "primary_key": [
+        "SpecialOfferID",
+        "ProductID"
+      ],
+      "synonyms": [
+        "special offer product"
+      ],
+      "business_definition": "Cross-reference mapping products to special promotional offers.",
+      "description": "Cross-reference table mapping products to special offer discounts.",
+      "columns": [
+        {
+          "name": "SpecialOfferID",
+          "qualified_name": "Sales.SpecialOfferProduct.SpecialOfferID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key for SpecialOfferProduct records.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "special offer id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ProductID",
+          "qualified_name": "Sales.SpecialOfferProduct.ProductID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Product identification number. Foreign key to Product.ProductID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "product id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.SpecialOfferProduct.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.SpecialOfferProduct.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Store",
+      "qualified_name": "Sales.Store",
+      "grain": "one row per store account",
+      "primary_key": [
+        "BusinessEntityID"
+      ],
+      "synonyms": [
+        "store"
+      ],
+      "business_definition": "Store business entities and customer store accounts.",
+      "description": "Customers (resellers) of Adventure Works products.",
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "qualified_name": "Sales.Store.BusinessEntityID",
+          "data_type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "description": "Primary key. Foreign key to Customer.BusinessEntityID.",
+          "semantic_type": "identifier",
+          "analytical_role": "entity_key",
+          "synonyms": [
+            "business entity id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Name",
+          "qualified_name": "Sales.Store.Name",
+          "data_type": "nvarchar(50)",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Name of the store.",
+          "semantic_type": "text",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "name"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "SalesPersonID",
+          "qualified_name": "Sales.Store.SalesPersonID",
+          "data_type": "int",
+          "nullable": true,
+          "primary_key": false,
+          "description": "ID of the sales person assigned to the customer. Foreign key to SalesPerson.BusinessEntityID.",
+          "semantic_type": "identifier",
+          "analytical_role": "dimension_key",
+          "synonyms": [
+            "sales person id"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "Demographics",
+          "qualified_name": "Sales.Store.Demographics",
+          "data_type": "xml",
+          "nullable": true,
+          "primary_key": false,
+          "description": "Demographic informationg about the store such as the number of employees, annual sales and store type.",
+          "semantic_type": "dimension",
+          "analytical_role": "dimension",
+          "synonyms": [
+            "demographics"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "rowguid",
+          "qualified_name": "Sales.Store.rowguid",
+          "data_type": "uniqueidentifier",
+          "nullable": false,
+          "primary_key": false,
+          "description": "ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.",
+          "semantic_type": "identifier",
+          "analytical_role": "attribute",
+          "synonyms": [
+            "rowguid"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": false,
+            "aggregatable": false
+          },
+          "preferred_aggregations": []
+        },
+        {
+          "name": "ModifiedDate",
+          "qualified_name": "Sales.Store.ModifiedDate",
+          "data_type": "datetime",
+          "nullable": false,
+          "primary_key": false,
+          "description": "Date and time the record was last updated.",
+          "semantic_type": "date",
+          "analytical_role": "time_dimension",
+          "synonyms": [
+            "modified date"
+          ],
+          "physical_computed_column": false,
+          "business_derivation": null,
+          "allowed_values": {},
+          "query_usage": {
+            "filterable": true,
+            "groupable": true,
+            "aggregatable": false
+          },
+          "preferred_aggregations": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "constraint_name": "FK_CountryRegionCurrency_CountryRegion_CountryRegionCode",
+      "from_schema": "Sales",
+      "from_table": "CountryRegionCurrency",
+      "from_qualified_table": "Sales.CountryRegionCurrency",
+      "from_columns": [
+        "CountryRegionCode"
+      ],
+      "from_qualified_columns": [
+        "Sales.CountryRegionCurrency.CountryRegionCode"
+      ],
+      "to_schema": "Person",
+      "to_table": "CountryRegion",
+      "to_qualified_table": "Person.CountryRegion",
+      "to_columns": [
+        "CountryRegionCode"
+      ],
+      "to_qualified_columns": [
+        "Person.CountryRegion.CountryRegionCode"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.CountryRegionCurrency.CountryRegionCode = Person.CountryRegion.CountryRegionCode"
+    },
+    {
+      "constraint_name": "FK_CountryRegionCurrency_Currency_CurrencyCode",
+      "from_schema": "Sales",
+      "from_table": "CountryRegionCurrency",
+      "from_qualified_table": "Sales.CountryRegionCurrency",
+      "from_columns": [
+        "CurrencyCode"
+      ],
+      "from_qualified_columns": [
+        "Sales.CountryRegionCurrency.CurrencyCode"
+      ],
+      "to_schema": "Sales",
+      "to_table": "Currency",
+      "to_qualified_table": "Sales.Currency",
+      "to_columns": [
+        "CurrencyCode"
+      ],
+      "to_qualified_columns": [
+        "Sales.Currency.CurrencyCode"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.CountryRegionCurrency.CurrencyCode = Sales.Currency.CurrencyCode"
+    },
+    {
+      "constraint_name": "FK_CurrencyRate_Currency_FromCurrencyCode",
+      "from_schema": "Sales",
+      "from_table": "CurrencyRate",
+      "from_qualified_table": "Sales.CurrencyRate",
+      "from_columns": [
+        "FromCurrencyCode"
+      ],
+      "from_qualified_columns": [
+        "Sales.CurrencyRate.FromCurrencyCode"
+      ],
+      "to_schema": "Sales",
+      "to_table": "Currency",
+      "to_qualified_table": "Sales.Currency",
+      "to_columns": [
+        "CurrencyCode"
+      ],
+      "to_qualified_columns": [
+        "Sales.Currency.CurrencyCode"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.CurrencyRate.FromCurrencyCode = Sales.Currency.CurrencyCode"
+    },
+    {
+      "constraint_name": "FK_CurrencyRate_Currency_ToCurrencyCode",
+      "from_schema": "Sales",
+      "from_table": "CurrencyRate",
+      "from_qualified_table": "Sales.CurrencyRate",
+      "from_columns": [
+        "ToCurrencyCode"
+      ],
+      "from_qualified_columns": [
+        "Sales.CurrencyRate.ToCurrencyCode"
+      ],
+      "to_schema": "Sales",
+      "to_table": "Currency",
+      "to_qualified_table": "Sales.Currency",
+      "to_columns": [
+        "CurrencyCode"
+      ],
+      "to_qualified_columns": [
+        "Sales.Currency.CurrencyCode"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.CurrencyRate.ToCurrencyCode = Sales.Currency.CurrencyCode"
+    },
+    {
+      "constraint_name": "FK_Customer_Person_PersonID",
+      "from_schema": "Sales",
+      "from_table": "Customer",
+      "from_qualified_table": "Sales.Customer",
+      "from_columns": [
+        "PersonID"
+      ],
+      "from_qualified_columns": [
+        "Sales.Customer.PersonID"
+      ],
+      "to_schema": "Person",
+      "to_table": "Person",
+      "to_qualified_table": "Person.Person",
+      "to_columns": [
+        "BusinessEntityID"
+      ],
+      "to_qualified_columns": [
+        "Person.Person.BusinessEntityID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.Customer.PersonID = Person.Person.BusinessEntityID"
+    },
+    {
+      "constraint_name": "FK_Customer_SalesTerritory_TerritoryID",
+      "from_schema": "Sales",
+      "from_table": "Customer",
+      "from_qualified_table": "Sales.Customer",
+      "from_columns": [
+        "TerritoryID"
+      ],
+      "from_qualified_columns": [
+        "Sales.Customer.TerritoryID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesTerritory",
+      "to_qualified_table": "Sales.SalesTerritory",
+      "to_columns": [
+        "TerritoryID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesTerritory.TerritoryID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.Customer.TerritoryID = Sales.SalesTerritory.TerritoryID"
+    },
+    {
+      "constraint_name": "FK_Customer_Store_StoreID",
+      "from_schema": "Sales",
+      "from_table": "Customer",
+      "from_qualified_table": "Sales.Customer",
+      "from_columns": [
+        "StoreID"
+      ],
+      "from_qualified_columns": [
+        "Sales.Customer.StoreID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "Store",
+      "to_qualified_table": "Sales.Store",
+      "to_columns": [
+        "BusinessEntityID"
+      ],
+      "to_qualified_columns": [
+        "Sales.Store.BusinessEntityID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.Customer.StoreID = Sales.Store.BusinessEntityID"
+    },
+    {
+      "constraint_name": "FK_PersonCreditCard_CreditCard_CreditCardID",
+      "from_schema": "Sales",
+      "from_table": "PersonCreditCard",
+      "from_qualified_table": "Sales.PersonCreditCard",
+      "from_columns": [
+        "CreditCardID"
+      ],
+      "from_qualified_columns": [
+        "Sales.PersonCreditCard.CreditCardID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "CreditCard",
+      "to_qualified_table": "Sales.CreditCard",
+      "to_columns": [
+        "CreditCardID"
+      ],
+      "to_qualified_columns": [
+        "Sales.CreditCard.CreditCardID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.PersonCreditCard.CreditCardID = Sales.CreditCard.CreditCardID"
+    },
+    {
+      "constraint_name": "FK_PersonCreditCard_Person_BusinessEntityID",
+      "from_schema": "Sales",
+      "from_table": "PersonCreditCard",
+      "from_qualified_table": "Sales.PersonCreditCard",
+      "from_columns": [
+        "BusinessEntityID"
+      ],
+      "from_qualified_columns": [
+        "Sales.PersonCreditCard.BusinessEntityID"
+      ],
+      "to_schema": "Person",
+      "to_table": "Person",
+      "to_qualified_table": "Person.Person",
+      "to_columns": [
+        "BusinessEntityID"
+      ],
+      "to_qualified_columns": [
+        "Person.Person.BusinessEntityID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.PersonCreditCard.BusinessEntityID = Person.Person.BusinessEntityID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderDetail_SalesOrderHeader_SalesOrderID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderDetail",
+      "from_qualified_table": "Sales.SalesOrderDetail",
+      "from_columns": [
+        "SalesOrderID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderDetail.SalesOrderID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesOrderHeader",
+      "to_qualified_table": "Sales.SalesOrderHeader",
+      "to_columns": [
+        "SalesOrderID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesOrderHeader.SalesOrderID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderDetail.SalesOrderID = Sales.SalesOrderHeader.SalesOrderID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderDetail_SpecialOfferProduct_SpecialOfferIDProductID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderDetail",
+      "from_qualified_table": "Sales.SalesOrderDetail",
+      "from_columns": [
+        "SpecialOfferID",
+        "ProductID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderDetail.SpecialOfferID",
+        "Sales.SalesOrderDetail.ProductID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SpecialOfferProduct",
+      "to_qualified_table": "Sales.SpecialOfferProduct",
+      "to_columns": [
+        "SpecialOfferID",
+        "ProductID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SpecialOfferProduct.SpecialOfferID",
+        "Sales.SpecialOfferProduct.ProductID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderDetail.SpecialOfferID = Sales.SpecialOfferProduct.SpecialOfferID AND Sales.SalesOrderDetail.ProductID = Sales.SpecialOfferProduct.ProductID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeader_Address_BillToAddressID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeader",
+      "from_qualified_table": "Sales.SalesOrderHeader",
+      "from_columns": [
+        "BillToAddressID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeader.BillToAddressID"
+      ],
+      "to_schema": "Person",
+      "to_table": "Address",
+      "to_qualified_table": "Person.Address",
+      "to_columns": [
+        "AddressID"
+      ],
+      "to_qualified_columns": [
+        "Person.Address.AddressID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeader.BillToAddressID = Person.Address.AddressID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeader_Address_ShipToAddressID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeader",
+      "from_qualified_table": "Sales.SalesOrderHeader",
+      "from_columns": [
+        "ShipToAddressID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeader.ShipToAddressID"
+      ],
+      "to_schema": "Person",
+      "to_table": "Address",
+      "to_qualified_table": "Person.Address",
+      "to_columns": [
+        "AddressID"
+      ],
+      "to_qualified_columns": [
+        "Person.Address.AddressID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeader.ShipToAddressID = Person.Address.AddressID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeader_CreditCard_CreditCardID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeader",
+      "from_qualified_table": "Sales.SalesOrderHeader",
+      "from_columns": [
+        "CreditCardID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeader.CreditCardID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "CreditCard",
+      "to_qualified_table": "Sales.CreditCard",
+      "to_columns": [
+        "CreditCardID"
+      ],
+      "to_qualified_columns": [
+        "Sales.CreditCard.CreditCardID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeader.CreditCardID = Sales.CreditCard.CreditCardID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeader_CurrencyRate_CurrencyRateID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeader",
+      "from_qualified_table": "Sales.SalesOrderHeader",
+      "from_columns": [
+        "CurrencyRateID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeader.CurrencyRateID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "CurrencyRate",
+      "to_qualified_table": "Sales.CurrencyRate",
+      "to_columns": [
+        "CurrencyRateID"
+      ],
+      "to_qualified_columns": [
+        "Sales.CurrencyRate.CurrencyRateID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeader.CurrencyRateID = Sales.CurrencyRate.CurrencyRateID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeader_Customer_CustomerID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeader",
+      "from_qualified_table": "Sales.SalesOrderHeader",
+      "from_columns": [
+        "CustomerID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeader.CustomerID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "Customer",
+      "to_qualified_table": "Sales.Customer",
+      "to_columns": [
+        "CustomerID"
+      ],
+      "to_qualified_columns": [
+        "Sales.Customer.CustomerID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeader.CustomerID = Sales.Customer.CustomerID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeader_SalesPerson_SalesPersonID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeader",
+      "from_qualified_table": "Sales.SalesOrderHeader",
+      "from_columns": [
+        "SalesPersonID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeader.SalesPersonID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesPerson",
+      "to_qualified_table": "Sales.SalesPerson",
+      "to_columns": [
+        "BusinessEntityID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesPerson.BusinessEntityID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeader.SalesPersonID = Sales.SalesPerson.BusinessEntityID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeader_SalesTerritory_TerritoryID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeader",
+      "from_qualified_table": "Sales.SalesOrderHeader",
+      "from_columns": [
+        "TerritoryID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeader.TerritoryID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesTerritory",
+      "to_qualified_table": "Sales.SalesTerritory",
+      "to_columns": [
+        "TerritoryID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesTerritory.TerritoryID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeader.TerritoryID = Sales.SalesTerritory.TerritoryID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeader_ShipMethod_ShipMethodID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeader",
+      "from_qualified_table": "Sales.SalesOrderHeader",
+      "from_columns": [
+        "ShipMethodID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeader.ShipMethodID"
+      ],
+      "to_schema": "Purchasing",
+      "to_table": "ShipMethod",
+      "to_qualified_table": "Purchasing.ShipMethod",
+      "to_columns": [
+        "ShipMethodID"
+      ],
+      "to_qualified_columns": [
+        "Purchasing.ShipMethod.ShipMethodID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeader.ShipMethodID = Purchasing.ShipMethod.ShipMethodID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeaderSalesReason_SalesOrderHeader_SalesOrderID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeaderSalesReason",
+      "from_qualified_table": "Sales.SalesOrderHeaderSalesReason",
+      "from_columns": [
+        "SalesOrderID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeaderSalesReason.SalesOrderID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesOrderHeader",
+      "to_qualified_table": "Sales.SalesOrderHeader",
+      "to_columns": [
+        "SalesOrderID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesOrderHeader.SalesOrderID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeaderSalesReason.SalesOrderID = Sales.SalesOrderHeader.SalesOrderID"
+    },
+    {
+      "constraint_name": "FK_SalesOrderHeaderSalesReason_SalesReason_SalesReasonID",
+      "from_schema": "Sales",
+      "from_table": "SalesOrderHeaderSalesReason",
+      "from_qualified_table": "Sales.SalesOrderHeaderSalesReason",
+      "from_columns": [
+        "SalesReasonID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesOrderHeaderSalesReason.SalesReasonID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesReason",
+      "to_qualified_table": "Sales.SalesReason",
+      "to_columns": [
+        "SalesReasonID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesReason.SalesReasonID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesOrderHeaderSalesReason.SalesReasonID = Sales.SalesReason.SalesReasonID"
+    },
+    {
+      "constraint_name": "FK_SalesPerson_Employee_BusinessEntityID",
+      "from_schema": "Sales",
+      "from_table": "SalesPerson",
+      "from_qualified_table": "Sales.SalesPerson",
+      "from_columns": [
+        "BusinessEntityID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesPerson.BusinessEntityID"
+      ],
+      "to_schema": "HumanResources",
+      "to_table": "Employee",
+      "to_qualified_table": "HumanResources.Employee",
+      "to_columns": [
+        "BusinessEntityID"
+      ],
+      "to_qualified_columns": [
+        "HumanResources.Employee.BusinessEntityID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesPerson.BusinessEntityID = HumanResources.Employee.BusinessEntityID"
+    },
+    {
+      "constraint_name": "FK_SalesPerson_SalesTerritory_TerritoryID",
+      "from_schema": "Sales",
+      "from_table": "SalesPerson",
+      "from_qualified_table": "Sales.SalesPerson",
+      "from_columns": [
+        "TerritoryID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesPerson.TerritoryID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesTerritory",
+      "to_qualified_table": "Sales.SalesTerritory",
+      "to_columns": [
+        "TerritoryID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesTerritory.TerritoryID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesPerson.TerritoryID = Sales.SalesTerritory.TerritoryID"
+    },
+    {
+      "constraint_name": "FK_SalesPersonQuotaHistory_SalesPerson_BusinessEntityID",
+      "from_schema": "Sales",
+      "from_table": "SalesPersonQuotaHistory",
+      "from_qualified_table": "Sales.SalesPersonQuotaHistory",
+      "from_columns": [
+        "BusinessEntityID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesPersonQuotaHistory.BusinessEntityID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesPerson",
+      "to_qualified_table": "Sales.SalesPerson",
+      "to_columns": [
+        "BusinessEntityID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesPerson.BusinessEntityID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesPersonQuotaHistory.BusinessEntityID = Sales.SalesPerson.BusinessEntityID"
+    },
+    {
+      "constraint_name": "FK_SalesTaxRate_StateProvince_StateProvinceID",
+      "from_schema": "Sales",
+      "from_table": "SalesTaxRate",
+      "from_qualified_table": "Sales.SalesTaxRate",
+      "from_columns": [
+        "StateProvinceID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesTaxRate.StateProvinceID"
+      ],
+      "to_schema": "Person",
+      "to_table": "StateProvince",
+      "to_qualified_table": "Person.StateProvince",
+      "to_columns": [
+        "StateProvinceID"
+      ],
+      "to_qualified_columns": [
+        "Person.StateProvince.StateProvinceID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesTaxRate.StateProvinceID = Person.StateProvince.StateProvinceID"
+    },
+    {
+      "constraint_name": "FK_SalesTerritory_CountryRegion_CountryRegionCode",
+      "from_schema": "Sales",
+      "from_table": "SalesTerritory",
+      "from_qualified_table": "Sales.SalesTerritory",
+      "from_columns": [
+        "CountryRegionCode"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesTerritory.CountryRegionCode"
+      ],
+      "to_schema": "Person",
+      "to_table": "CountryRegion",
+      "to_qualified_table": "Person.CountryRegion",
+      "to_columns": [
+        "CountryRegionCode"
+      ],
+      "to_qualified_columns": [
+        "Person.CountryRegion.CountryRegionCode"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesTerritory.CountryRegionCode = Person.CountryRegion.CountryRegionCode"
+    },
+    {
+      "constraint_name": "FK_SalesTerritoryHistory_SalesPerson_BusinessEntityID",
+      "from_schema": "Sales",
+      "from_table": "SalesTerritoryHistory",
+      "from_qualified_table": "Sales.SalesTerritoryHistory",
+      "from_columns": [
+        "BusinessEntityID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesTerritoryHistory.BusinessEntityID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesPerson",
+      "to_qualified_table": "Sales.SalesPerson",
+      "to_columns": [
+        "BusinessEntityID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesPerson.BusinessEntityID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesTerritoryHistory.BusinessEntityID = Sales.SalesPerson.BusinessEntityID"
+    },
+    {
+      "constraint_name": "FK_SalesTerritoryHistory_SalesTerritory_TerritoryID",
+      "from_schema": "Sales",
+      "from_table": "SalesTerritoryHistory",
+      "from_qualified_table": "Sales.SalesTerritoryHistory",
+      "from_columns": [
+        "TerritoryID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SalesTerritoryHistory.TerritoryID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesTerritory",
+      "to_qualified_table": "Sales.SalesTerritory",
+      "to_columns": [
+        "TerritoryID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesTerritory.TerritoryID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SalesTerritoryHistory.TerritoryID = Sales.SalesTerritory.TerritoryID"
+    },
+    {
+      "constraint_name": "FK_ShoppingCartItem_Product_ProductID",
+      "from_schema": "Sales",
+      "from_table": "ShoppingCartItem",
+      "from_qualified_table": "Sales.ShoppingCartItem",
+      "from_columns": [
+        "ProductID"
+      ],
+      "from_qualified_columns": [
+        "Sales.ShoppingCartItem.ProductID"
+      ],
+      "to_schema": "Production",
+      "to_table": "Product",
+      "to_qualified_table": "Production.Product",
+      "to_columns": [
+        "ProductID"
+      ],
+      "to_qualified_columns": [
+        "Production.Product.ProductID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.ShoppingCartItem.ProductID = Production.Product.ProductID"
+    },
+    {
+      "constraint_name": "FK_SpecialOfferProduct_Product_ProductID",
+      "from_schema": "Sales",
+      "from_table": "SpecialOfferProduct",
+      "from_qualified_table": "Sales.SpecialOfferProduct",
+      "from_columns": [
+        "ProductID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SpecialOfferProduct.ProductID"
+      ],
+      "to_schema": "Production",
+      "to_table": "Product",
+      "to_qualified_table": "Production.Product",
+      "to_columns": [
+        "ProductID"
+      ],
+      "to_qualified_columns": [
+        "Production.Product.ProductID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SpecialOfferProduct.ProductID = Production.Product.ProductID"
+    },
+    {
+      "constraint_name": "FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID",
+      "from_schema": "Sales",
+      "from_table": "SpecialOfferProduct",
+      "from_qualified_table": "Sales.SpecialOfferProduct",
+      "from_columns": [
+        "SpecialOfferID"
+      ],
+      "from_qualified_columns": [
+        "Sales.SpecialOfferProduct.SpecialOfferID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SpecialOffer",
+      "to_qualified_table": "Sales.SpecialOffer",
+      "to_columns": [
+        "SpecialOfferID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SpecialOffer.SpecialOfferID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.SpecialOfferProduct.SpecialOfferID = Sales.SpecialOffer.SpecialOfferID"
+    },
+    {
+      "constraint_name": "FK_Store_BusinessEntity_BusinessEntityID",
+      "from_schema": "Sales",
+      "from_table": "Store",
+      "from_qualified_table": "Sales.Store",
+      "from_columns": [
+        "BusinessEntityID"
+      ],
+      "from_qualified_columns": [
+        "Sales.Store.BusinessEntityID"
+      ],
+      "to_schema": "Person",
+      "to_table": "BusinessEntity",
+      "to_qualified_table": "Person.BusinessEntity",
+      "to_columns": [
+        "BusinessEntityID"
+      ],
+      "to_qualified_columns": [
+        "Person.BusinessEntity.BusinessEntityID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.Store.BusinessEntityID = Person.BusinessEntity.BusinessEntityID"
+    },
+    {
+      "constraint_name": "FK_Store_SalesPerson_SalesPersonID",
+      "from_schema": "Sales",
+      "from_table": "Store",
+      "from_qualified_table": "Sales.Store",
+      "from_columns": [
+        "SalesPersonID"
+      ],
+      "from_qualified_columns": [
+        "Sales.Store.SalesPersonID"
+      ],
+      "to_schema": "Sales",
+      "to_table": "SalesPerson",
+      "to_qualified_table": "Sales.SalesPerson",
+      "to_columns": [
+        "BusinessEntityID"
+      ],
+      "to_qualified_columns": [
+        "Sales.SalesPerson.BusinessEntityID"
+      ],
+      "cardinality": "many-to-one",
+      "join_condition": "Sales.Store.SalesPersonID = Sales.SalesPerson.BusinessEntityID"
+    }
+  ],
+  "metrics": [
+    {
+      "name": "revenue",
+      "qualified_name": "revenue",
+      "description": "Total sales order subtotal revenue before tax and freight.",
+      "target_table": "Sales.SalesOrderHeader",
+      "source_column": "Sales.SalesOrderHeader.SubTotal",
+      "aggregation": "SUM",
+      "expression": "SUM(Sales.SalesOrderHeader.SubTotal)",
+      "synonyms": [
+        "revenue",
+        "sales revenue",
+        "total sales",
+        "subtotal revenue"
+      ]
+    },
+    {
+      "name": "total_customer_charge",
+      "qualified_name": "total_customer_charge",
+      "description": "Total amount charged to customers, including subtotal, tax, and freight.",
+      "target_table": "Sales.SalesOrderHeader",
+      "source_column": "Sales.SalesOrderHeader.TotalDue",
+      "aggregation": "SUM",
+      "expression": "SUM(Sales.SalesOrderHeader.TotalDue)",
+      "synonyms": [
+        "total customer charge",
+        "total due",
+        "grand total",
+        "amount due"
+      ]
+    },
+    {
+      "name": "units_sold",
+      "qualified_name": "units_sold",
+      "description": "Total quantity of products sold across order line items.",
+      "target_table": "Sales.SalesOrderDetail",
+      "source_column": "Sales.SalesOrderDetail.OrderQty",
+      "aggregation": "SUM",
+      "expression": "SUM(Sales.SalesOrderDetail.OrderQty)",
+      "synonyms": [
+        "units sold",
+        "total units",
+        "quantity sold",
+        "total order quantity"
+      ]
+    },
+    {
+      "name": "tax_collected",
+      "qualified_name": "tax_collected",
+      "description": "Total sales tax amount collected.",
+      "target_table": "Sales.SalesOrderHeader",
+      "source_column": "Sales.SalesOrderHeader.TaxAmt",
+      "aggregation": "SUM",
+      "expression": "SUM(Sales.SalesOrderHeader.TaxAmt)",
+      "synonyms": [
+        "tax collected",
+        "total tax",
+        "sales tax amount"
+      ]
+    },
+    {
+      "name": "freight_charges",
+      "qualified_name": "freight_charges",
+      "description": "Total shipping/freight charges collected.",
+      "target_table": "Sales.SalesOrderHeader",
+      "source_column": "Sales.SalesOrderHeader.Freight",
+      "aggregation": "SUM",
+      "expression": "SUM(Sales.SalesOrderHeader.Freight)",
+      "synonyms": [
+        "freight charges",
+        "shipping charges",
+        "total freight",
+        "shipping cost"
+      ]
+    },
+    {
+      "name": "order_count",
+      "qualified_name": "order_count",
+      "description": "Total count of sales orders.",
+      "target_table": "Sales.SalesOrderHeader",
+      "source_column": "Sales.SalesOrderHeader.SalesOrderID",
+      "aggregation": "COUNT",
+      "expression": "COUNT(Sales.SalesOrderHeader.SalesOrderID)",
+      "synonyms": [
+        "order count",
+        "total orders",
+        "number of orders"
+      ]
+    },
+    {
+      "name": "customer_count",
+      "qualified_name": "customer_count",
+      "description": "Total count of distinct customers.",
+      "target_table": "Sales.Customer",
+      "source_column": "Sales.Customer.CustomerID",
+      "aggregation": "COUNT_DISTINCT",
+      "expression": "COUNT(DISTINCT Sales.Customer.CustomerID)",
+      "synonyms": [
+        "customer count",
+        "total customers",
+        "number of customers"
+      ]
+    },
+    {
+      "name": "sales_person_count",
+      "qualified_name": "sales_person_count",
+      "description": "Total count of sales representatives.",
+      "target_table": "Sales.SalesPerson",
+      "source_column": "Sales.SalesPerson.BusinessEntityID",
+      "aggregation": "COUNT_DISTINCT",
+      "expression": "COUNT(DISTINCT Sales.SalesPerson.BusinessEntityID)",
+      "synonyms": [
+        "sales person count",
+        "sales representatives",
+        "total sales reps"
+      ]
+    }
+  ]
+}
