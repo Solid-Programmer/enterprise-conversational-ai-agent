@@ -1,5 +1,9 @@
-"""Bounded synchronous control flow for the Sales runtime."""
-from app.db.sql_executor import SQLExecutionError, execute_validated_sql
+"""Bounded asynchronous control flow for the Sales runtime."""
+import asyncio
+
+from app.core.config import settings
+from app.core.execution import StageTimeoutError, run_with_timeout
+from app.db.sql_executor import SQLExecutionError, execute_validated_sql_with_timeout
 from app.auth.rbac import AuthorizationContext
 from app.db.sql_validator import authorize_sql_tables, validate_sql
 from app.orchestration.clarification import clarification_result
@@ -19,11 +23,13 @@ MAX_REPAIR_ATTEMPTS = 2
 class SalesOrchestrator:
     """Route first, then run exactly one chat, tool, or Text-to-SQL path."""
 
-    def handle(self, question: str, authorization: AuthorizationContext) -> ChatResult:
+    async def handle(self, question: str, authorization: AuthorizationContext) -> ChatResult:
         if not question or not question.strip():
             return ChatResult(status="error", message="A non-empty message is required.")
         try:
-            decision = route_question(question)
+            decision = await route_question(question)
+        except StageTimeoutError:
+            raise
         except Exception as exc:
             return human_review_result(question, "Routing could not safely complete.", error=str(exc))
 
@@ -32,8 +38,8 @@ class SalesOrchestrator:
         if decision.action == "chat":
             return self._run_chat(question)
         if decision.action == "tool":
-            return self._run_tool(question, decision.tool_name or "", decision.arguments)
-        return self._run_text_to_sql(question, authorization)
+            return await self._run_tool(question, decision.tool_name or "", decision.arguments)
+        return await self._run_text_to_sql(question, authorization)
 
     def _run_chat(self, question: str) -> ChatResult:
         """Return a concise no-data response without invoking retrieval or analytical paths."""
@@ -49,7 +55,7 @@ class SalesOrchestrator:
             answer = "Hello! How can I help with your sales analysis today?"
         return ChatResult(status="success", route="chat", answer=answer, data=None)
 
-    def _run_tool(self, question: str, tool_name: str, arguments: dict) -> ChatResult:
+    async def _run_tool(self, question: str, tool_name: str, arguments: dict) -> ChatResult:
         if get_registered_tool(tool_name) is None:
             return human_review_result(question, "Router selected an unregistered tool.", error=tool_name, route="tool")
         with traced_span("tool.execute", {
@@ -58,19 +64,27 @@ class SalesOrchestrator:
             "tool.parameters": str(arguments),
         }, span_kind="TOOL", input_value=str(arguments), input_mime_type="application/json") as span:
             try:
-                data = execute_tool(tool_name, arguments)
+                data = await run_with_timeout(
+                    asyncio.to_thread(execute_tool, tool_name, arguments),
+                    timeout_seconds=settings.TOOL_TIMEOUT_SECONDS,
+                    stage="tool.execute",
+                )
                 set_span_attributes(span, {"tool.execution_success": True, **result_summary(data)})
                 set_span_output(span, result_summary(data), mime_type="application/json")
                 return ChatResult(status="success", route="tool", tool_name=tool_name, data=data, metadata={"tool_arguments": arguments})
+            except StageTimeoutError:
+                raise
             except Exception as exc:
                 mark_span_error(span, exc)
                 set_span_attributes(span, {"tool.execution_success": False, "failure.stage": "tool.execute", "failure.reason": str(exc)})
                 return human_review_result(question, "Deterministic tool execution failed without a safe fallback.", error=str(exc), route="tool")
 
-    def _run_text_to_sql(self, question: str, authorization: AuthorizationContext) -> ChatResult:
+    async def _run_text_to_sql(self, question: str, authorization: AuthorizationContext) -> ChatResult:
         try:
-            context = build_text_to_sql_context(question)
-            generated = TextToSQLGenerator().generate_sql(question, context)
+            context = await build_text_to_sql_context(question)
+            generated = await TextToSQLGenerator().generate_sql(question, context)
+        except StageTimeoutError:
+            raise
         except Exception as exc:
             return human_review_result(question, "Text-to-SQL context retrieval or generation failed.", error=str(exc), route="text_to_sql")
         if not generated.sql:
@@ -99,7 +113,7 @@ class SalesOrchestrator:
                         },
                     )
                 try:
-                    data = execute_validated_sql(validation)
+                    data = await execute_validated_sql_with_timeout(validation)
                     return ChatResult(
                         status="success",
                         route="text_to_sql",
@@ -115,7 +129,9 @@ class SalesOrchestrator:
             if attempt == MAX_REPAIR_ATTEMPTS:
                 break
             try:
-                repaired = repair_sql(question, candidate_sql, last_error, context, attempt_number=attempt + 1)
+                repaired = await repair_sql(question, candidate_sql, last_error, context, attempt_number=attempt + 1)
+            except StageTimeoutError:
+                raise
             except Exception as exc:
                 return human_review_result(
                     question,

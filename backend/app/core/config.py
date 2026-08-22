@@ -23,6 +23,14 @@ class Settings(BaseSettings):
     TRACE_RESULT_PREVIEW_ROWS: int = 5
     AUTH0_DOMAIN: str
     AUTH0_AUDIENCE: str
+    REQUEST_TIMEOUT_SECONDS: float = 120
+    ROUTER_TIMEOUT_SECONDS: float = 15
+    TEXT_TO_SQL_TIMEOUT_SECONDS: float = 30
+    SQL_REPAIR_TIMEOUT_SECONDS: float = 30
+    ANSWER_GENERATION_TIMEOUT_SECONDS: float = 30
+    RETRIEVAL_TIMEOUT_SECONDS: float = 30
+    TOOL_TIMEOUT_SECONDS: float = 20
+    SQL_EXECUTION_TIMEOUT_SECONDS: float = 15
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parents[3] / ".env",

@@ -30,7 +30,7 @@ class OllamaEmbeddings:
         response = httpx.post(
             f"{self.base_url}/api/embed",
             json={"model": self.model, "input": list(inputs)},
-            timeout=60.0,
+            timeout=settings.RETRIEVAL_TIMEOUT_SECONDS,
         )
         response.raise_for_status()
         embeddings = response.json().get("embeddings")

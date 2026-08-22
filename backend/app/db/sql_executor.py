@@ -1,12 +1,16 @@
 """Read-only database execution, separate from deterministic SQL validation."""
 
 import datetime
+import asyncio
 from decimal import Decimal
 from typing import Any, Dict, List
 
 from app.db.connection import get_db_connection
 from app.db.sql_validator import SQLValidationResult
+from app.core.config import settings
+from app.core.execution import run_with_timeout
 from app.observability.tracing import result_summary, set_span_attributes, set_span_output, traced_span
+from app.security.pii_masking import mask_sensitive_result
 
 
 class SQLExecutionError(RuntimeError):
@@ -37,14 +41,16 @@ def execute_validated_sql(validation: SQLValidationResult, params: tuple = ()) -
         raise ValueError("Only successfully validated SQL can be executed.")
     with traced_span("sql.execute", {}, span_kind="TOOL", input_value=validation.normalized_sql) as span:
         conn = get_db_connection()
-        cursor = conn.cursor()
         try:
+            conn.timeout = int(settings.SQL_EXECUTION_TIMEOUT_SECONDS)
+            cursor = conn.cursor()
             cursor.execute(validation.normalized_sql, params)
             if not cursor.description:
                 results: List[Dict[str, Any]] = []
             else:
                 columns = [column[0] for column in cursor.description]
                 results = [{name: _normalize_value(value) for name, value in zip(columns, row)} for row in cursor.fetchall()]
+            results = mask_sensitive_result(results)
             set_span_attributes(span, {"sql.execution_success": True, **result_summary(results)})
             set_span_output(span, result_summary(results), mime_type="application/json")
             return results
@@ -53,6 +59,18 @@ def execute_validated_sql(validation: SQLValidationResult, params: tuple = ()) -
             raise SQLExecutionError(str(exc)) from exc
         finally:
             conn.close()
+
+
+async def execute_validated_sql_with_timeout(
+    validation: SQLValidationResult,
+    params: tuple = (),
+) -> List[Dict[str, Any]]:
+    """Run the existing blocking SQL executor in a bounded worker thread."""
+    return await run_with_timeout(
+        asyncio.to_thread(execute_validated_sql, validation, params),
+        timeout_seconds=settings.SQL_EXECUTION_TIMEOUT_SECONDS,
+        stage="sql.execute",
+    )
 
 
 def execute_sql_query(sql_query: str, params: tuple = ()) -> List[Dict[str, Any]]:

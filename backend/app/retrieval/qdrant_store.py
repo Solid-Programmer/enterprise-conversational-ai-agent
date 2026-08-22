@@ -16,7 +16,7 @@ class QdrantStore:
 
     def __init__(self, collection_name: str, url: str = settings.QDRANT_URL) -> None:
         self.collection_name = collection_name
-        self.client = QdrantClient(url=url)
+        self.client = QdrantClient(url=url, timeout=settings.RETRIEVAL_TIMEOUT_SECONDS)
 
     def ensure_collection(self, vector_size: int, recreate: bool = False) -> None:
         if recreate and self.client.collection_exists(self.collection_name):

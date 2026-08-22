@@ -5,6 +5,7 @@ from typing import Any, Optional
 from pydantic import BaseModel
 
 from app.llm.qwen_client import generate_structured
+from app.core.config import settings
 from app.observability.tracing import compact_json, result_summary
 from app.prompts import load_prompt, render_prompt
 
@@ -15,10 +16,10 @@ class AnswerGeneration(BaseModel):
     answer: str
 
 
-def generate_answer(question: str, data: Any, sql: Optional[str]) -> AnswerGeneration:
+async def generate_answer(question: str, data: Any, sql: Optional[str]) -> AnswerGeneration:
     """Generate an answer grounded in a bounded preview of trusted tool/SQL output."""
     preview = result_summary(data)
-    return generate_structured(
+    return await generate_structured(
         system_prompt=load_prompt("answer_generation_system_v1.txt"),
         user_prompt=render_prompt(
             "answer_generation_user_v1.txt",
@@ -30,6 +31,7 @@ def generate_answer(question: str, data: Any, sql: Optional[str]) -> AnswerGener
         temperature=0,
         max_output_tokens=400,
         operation_name="answer.generate",
+        timeout_seconds=settings.ANSWER_GENERATION_TIMEOUT_SECONDS,
         trace_attributes={"answer.has_sql": sql is not None, **preview},
         result_attributes=lambda result: {"answer.text": result.answer},
     )

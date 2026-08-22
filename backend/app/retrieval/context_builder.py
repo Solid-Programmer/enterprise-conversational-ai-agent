@@ -1,5 +1,6 @@
 """Build bounded Text-to-SQL context from independent Qdrant retrievals."""
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any, Dict, List
@@ -18,10 +19,12 @@ def _format_hits(title: str, hits: List[Dict[str, Any]]) -> str:
     return "\n\n".join(blocks)
 
 
-def build_text_to_sql_context(question: str) -> str:
+async def build_text_to_sql_context(question: str) -> str:
     """Independently retrieve examples and schema context, then combine both with canonical rules."""
-    verified_examples = retrieve_verified_queries(question, top_k=5)
-    schema_chunks = retrieve_schema_context(question, top_k=8)
+    verified_examples, schema_chunks = await asyncio.gather(
+        retrieve_verified_queries(question, top_k=5),
+        retrieve_schema_context(question, top_k=8),
+    )
     rules = json.loads(BUSINESS_RULES_PATH.read_text(encoding="utf-8"))
     global_rules = rules.get("global_anti_hallucination_rules", [])
     return "\n\n".join([
