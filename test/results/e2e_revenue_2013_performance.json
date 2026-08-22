@@ -1,0 +1,182 @@
+{
+  "generated_at_utc": "2026-08-22T11:13:06.985582+00:00",
+  "query": "Please Provide total revenue in 2013",
+  "authentication_mode": "Auth0 identity override; real SQL-backed RBAC still measured",
+  "http_status_code": 200,
+  "timings": {
+    "rbac_db_connection": {
+      "total_ms": 21.38,
+      "calls": 1,
+      "samples_ms": [
+        21.38
+      ]
+    },
+    "rbac_context_lookup": {
+      "total_ms": 60.13,
+      "calls": 1,
+      "samples_ms": [
+        60.13
+      ]
+    },
+    "ollama_chat_request": {
+      "total_ms": 3697.22,
+      "calls": 3,
+      "samples_ms": [
+        1181.2,
+        1266.64,
+        1249.38
+      ]
+    },
+    "router_decision": {
+      "total_ms": 1364.78,
+      "calls": 1,
+      "samples_ms": [
+        1364.78
+      ]
+    },
+    "ollama_embeddings_client_initialization": {
+      "total_ms": 0.01,
+      "calls": 2,
+      "samples_ms": [
+        0.01,
+        0.0
+      ]
+    },
+    "ollama_query_embedding": {
+      "total_ms": 4635.87,
+      "calls": 2,
+      "samples_ms": [
+        2309.93,
+        2325.94
+      ]
+    },
+    "qdrant_client_initialization": {
+      "total_ms": 484.1,
+      "calls": 2,
+      "samples_ms": [
+        241.19,
+        242.91
+      ]
+    },
+    "qdrant_vector_search": {
+      "total_ms": 70.6,
+      "calls": 2,
+      "samples_ms": [
+        37.12,
+        33.48
+      ]
+    },
+    "retrieval_semantic_schema": {
+      "total_ms": 2589.2,
+      "calls": 1,
+      "samples_ms": [
+        2589.2
+      ]
+    },
+    "retrieval_verified_queries": {
+      "total_ms": 2603.39,
+      "calls": 1,
+      "samples_ms": [
+        2603.39
+      ]
+    },
+    "context_build_total": {
+      "total_ms": 2603.7,
+      "calls": 1,
+      "samples_ms": [
+        2603.7
+      ]
+    },
+    "sql_generation": {
+      "total_ms": 1267.63,
+      "calls": 1,
+      "samples_ms": [
+        1267.63
+      ]
+    },
+    "sql_validation": {
+      "total_ms": 11.28,
+      "calls": 1,
+      "samples_ms": [
+        11.28
+      ]
+    },
+    "sql_table_authorization": {
+      "total_ms": 0.48,
+      "calls": 1,
+      "samples_ms": [
+        0.48
+      ]
+    },
+    "sql_db_connection": {
+      "total_ms": 2.08,
+      "calls": 1,
+      "samples_ms": [
+        2.08
+      ]
+    },
+    "result_masking": {
+      "total_ms": 0.01,
+      "calls": 1,
+      "samples_ms": [
+        0.01
+      ]
+    },
+    "sql_execution": {
+      "total_ms": 3319.79,
+      "calls": 1,
+      "samples_ms": [
+        3319.79
+      ]
+    },
+    "orchestrator_handle": {
+      "total_ms": 8567.69,
+      "calls": 1,
+      "samples_ms": [
+        8567.69
+      ]
+    },
+    "answer_generation": {
+      "total_ms": 1251.35,
+      "calls": 1,
+      "samples_ms": [
+        1251.35
+      ]
+    },
+    "http_total": {
+      "total_ms": 9886.0,
+      "calls": 1,
+      "samples_ms": [
+        9886.0
+      ]
+    }
+  },
+  "derived_timings": {
+    "retrieval_parallel_critical_path_ms": 2603.39,
+    "context_assembly_overhead_ms": 0.3,
+    "rbac_queries_and_mapping_ms": 38.75,
+    "sql_query_fetch_normalize_ms": 3317.7,
+    "serial_llm_stage_total_ms": 3883.75,
+    "structured_prompt_parse_trace_overhead_ms": 186.53,
+    "orchestrator_unattributed_overhead_ms": 0.05,
+    "http_auth_validation_serialization_overhead_ms": 6.82
+  },
+  "response": {
+    "status": "success",
+    "route": "text_to_sql",
+    "tool_name": null,
+    "sql": "SELECT SUM(SubTotal) AS TotalRevenue2013 FROM Sales.SalesOrderHeader WHERE YEAR(OrderDate) = 2013",
+    "answer": "The total revenue in 2013 was $43,622,479.05.",
+    "data": [
+      {
+        "TotalRevenue2013": 43622479.0537
+      }
+    ],
+    "message": null,
+    "metadata": {
+      "repair_attempts": 0,
+      "trace_id": "ff1c949de950595b03823e415ef52d8d",
+      "request_id": "e600a022-4fb7-4f35-9d72-1485dc2aeeb5"
+    }
+  }
+}

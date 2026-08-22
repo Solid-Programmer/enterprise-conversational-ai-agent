@@ -463,7 +463,19 @@ cd backend
 python -m pytest tests/test_e2e_performance.py::test_e2e_revenue_2013_live_timing_breakdown -s -p no:cacheprovider
 ```
 
-It measures routing, retrieval, generation, validation, authorization, execution, answer generation, and total latency. It constructs authorization context directly and does not exercise Auth0 or the HTTP boundary.
+The live benchmark calls the real FastAPI `POST /api/chat` boundary and measures:
+
+- Auth0 verification when `E2E_AUTH0_ACCESS_TOKEN` is supplied;
+- SQL-backed RBAC connection, queries, and mapping;
+- routing and each Ollama chat request;
+- both concurrent query embeddings and Qdrant vector searches;
+- context assembly, SQL generation, validation, and table authorization;
+- SQL connection, query/fetch/normalization, and result masking;
+- answer generation, orchestration overhead, response serialization, and total HTTP time.
+
+Without a test token, the benchmark overrides only Auth0 identity resolution. Set `E2E_AUTH_SUBJECT` to a mapped subject, or let the test select the first active RBAC user allowed to access `Sales.SalesOrderHeader`. Real RBAC and every downstream service are still exercised.
+
+The test prints a timing table and writes the latest machine-readable result, generated SQL, data, answer, and timing samples to `test/results/e2e_revenue_2013_performance.json`.
 
 ### Frontend build
 
