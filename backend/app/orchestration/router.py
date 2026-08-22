@@ -1,28 +1,34 @@
-"""Structured Qwen/Ollama routing between tools, Text-to-SQL, and clarification."""
+"""Structured routing between chat, tools, Text-to-SQL, and clarification."""
+
+import re
 
 from app.llm.qwen_client import generate_structured
 from app.orchestration.models import RouteDecision
+from app.prompts import load_prompt, render_prompt
 from app.tools.registry import list_tool_definitions
 
 
-ROUTER_SYSTEM_PROMPT = """You route Sales analytics requests. Return only the supplied JSON schema.
-Choose action=tool only when one listed deterministic business tool clearly covers the request.
-Choose action=text_to_sql for flexible or ad-hoc read-only analytics not covered by one tool.
-Choose action=clarify when business meaning or required filters are materially ambiguous.
-An explicit entity lookup or filter is not ambiguous merely because no deterministic tool matches it.
-For example, a request for credit-card details for a specified sales order must use text_to_sql,
-not clarify: the order number is an explicit filter and the request can be answered from schema context.
-Never ask the user which tool should be used. Tool selection is the router's responsibility.
-Never choose HITL. For tool, use an exact listed tool_name and only supported arguments.
-For clarify, provide a short clarification_question. Do not generate SQL."""
+def is_simple_chat_message(question: str) -> bool:
+    """Recognize common no-data messages without an unnecessary model call."""
+    normalized = re.sub(r"\s+", " ", question.strip().lower())
+    normalized = normalized.rstrip(".!? ")
+    return normalized in {
+        "hello", "hi", "hey", "hello there", "hi there", "hey there",
+        "good morning", "good afternoon", "good evening", "how are you",
+        "thanks", "thank you", "thx", "thank you very much",
+        "what can you do", "how can you help me", "how can you help",
+    }
 
 
 def route_question(question: str) -> RouteDecision:
     """Route one question using metadata only; no tool implementation is shown to the model."""
+    if is_simple_chat_message(question):
+        return RouteDecision(action="chat", reason="Message does not require Sales data access.")
+
     tools = [definition.model_dump() for definition in list_tool_definitions()]
     decision = generate_structured(
-        system_prompt=ROUTER_SYSTEM_PROMPT,
-        user_prompt=f"User question:\n{question}\n\nAvailable deterministic tools:\n{tools}",
+        system_prompt=load_prompt("router_system_v3.txt"),
+        user_prompt=render_prompt("router_user_v1.txt", question=question, tools=tools),
         response_model=RouteDecision,
         temperature=0,
         operation_name="router.decide",
@@ -35,5 +41,9 @@ def route_question(question: str) -> RouteDecision:
         },
     )
     if decision.action == "tool" and not decision.tool_name:
-        return RouteDecision(action="clarify", clarification_question="Which sales analysis would you like me to run?", reason="Tool route omitted a tool name.")
+        return RouteDecision(
+            action="clarify",
+            clarification_question=load_prompt("clarification_missing_tool_v1.txt"),
+            reason="Tool route omitted a tool name.",
+        )
     return decision

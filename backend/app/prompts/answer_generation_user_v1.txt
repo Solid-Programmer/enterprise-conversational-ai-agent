@@ -1,0 +1,8 @@
+Original user question:
+{question}
+
+Generated SQL, if applicable:
+{sql}
+
+Bounded result data preview:
+{data_preview}

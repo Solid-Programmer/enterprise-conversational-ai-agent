@@ -1,6 +1,7 @@
 """Bounded synchronous control flow for the Sales runtime."""
 from app.db.sql_executor import SQLExecutionError, execute_validated_sql
-from app.db.sql_validator import validate_sql
+from app.auth.rbac import AuthorizationContext
+from app.db.sql_validator import authorize_sql_tables, validate_sql
 from app.orchestration.clarification import clarification_result
 from app.orchestration.hitl import human_review_result
 from app.orchestration.models import ChatResult
@@ -16,9 +17,9 @@ MAX_REPAIR_ATTEMPTS = 2
 
 
 class SalesOrchestrator:
-    """Route first, then run exactly one deterministic tool or Text-to-SQL path."""
+    """Route first, then run exactly one chat, tool, or Text-to-SQL path."""
 
-    def handle(self, question: str) -> ChatResult:
+    def handle(self, question: str, authorization: AuthorizationContext) -> ChatResult:
         if not question or not question.strip():
             return ChatResult(status="error", message="A non-empty message is required.")
         try:
@@ -28,9 +29,25 @@ class SalesOrchestrator:
 
         if decision.action == "clarify":
             return clarification_result(question, decision)
+        if decision.action == "chat":
+            return self._run_chat(question)
         if decision.action == "tool":
             return self._run_tool(question, decision.tool_name or "", decision.arguments)
-        return self._run_text_to_sql(question)
+        return self._run_text_to_sql(question, authorization)
+
+    def _run_chat(self, question: str) -> ChatResult:
+        """Return a concise no-data response without invoking retrieval or analytical paths."""
+        normalized = question.strip().lower()
+        if any(phrase in normalized for phrase in ("thank", "thx")):
+            answer = "You're welcome."
+        elif "what can you do" in normalized or "how can you help" in normalized:
+            answer = (
+                "I can help analyze sales, customers, territories, products, promotions, trends, "
+                "and other questions available in the connected Sales data."
+            )
+        else:
+            answer = "Hello! How can I help with your sales analysis today?"
+        return ChatResult(status="success", route="chat", answer=answer, data=None)
 
     def _run_tool(self, question: str, tool_name: str, arguments: dict) -> ChatResult:
         if get_registered_tool(tool_name) is None:
@@ -50,7 +67,7 @@ class SalesOrchestrator:
                 set_span_attributes(span, {"tool.execution_success": False, "failure.stage": "tool.execute", "failure.reason": str(exc)})
                 return human_review_result(question, "Deterministic tool execution failed without a safe fallback.", error=str(exc), route="tool")
 
-    def _run_text_to_sql(self, question: str) -> ChatResult:
+    def _run_text_to_sql(self, question: str, authorization: AuthorizationContext) -> ChatResult:
         try:
             context = build_text_to_sql_context(question)
             generated = TextToSQLGenerator().generate_sql(question, context)
@@ -64,6 +81,23 @@ class SalesOrchestrator:
         for attempt in range(MAX_REPAIR_ATTEMPTS + 1):
             validation = validate_sql(candidate_sql)
             if validation.valid:
+                table_authorization = authorize_sql_tables(
+                    validation.normalized_sql or candidate_sql,
+                    authorization.allowed_tables,
+                    role=authorization.role,
+                )
+                if not table_authorization.authorized:
+                    return ChatResult(
+                        status="error",
+                        route="text_to_sql",
+                        answer="You do not have access to the data required for this request.",
+                        message="SQL table access was denied.",
+                        metadata={
+                            "authorization_allowed": False,
+                            "unauthorized_tables": table_authorization.unauthorized_tables,
+                            "authorization_errors": table_authorization.errors,
+                        },
+                    )
                 try:
                     data = execute_validated_sql(validation)
                     return ChatResult(

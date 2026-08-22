@@ -1,0 +1,11 @@
+Original user question:
+{question}
+
+Generated SQL:
+{generated_sql}
+
+Validation or execution error:
+{error}
+
+Relevant schema context and business rules:
+{context}

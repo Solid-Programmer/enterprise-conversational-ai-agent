@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,9 +21,11 @@ class Settings(BaseSettings):
     PHOENIX_ENDPOINT: str = "http://localhost:6006/v1/traces"
     PHOENIX_PROJECT_NAME: str = "enterprise-conversational-agent"
     TRACE_RESULT_PREVIEW_ROWS: int = 5
+    AUTH0_DOMAIN: str
+    AUTH0_AUDIENCE: str
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=Path(__file__).resolve().parents[3] / ".env",
         env_file_encoding="utf-8",
         extra="ignore"
     )

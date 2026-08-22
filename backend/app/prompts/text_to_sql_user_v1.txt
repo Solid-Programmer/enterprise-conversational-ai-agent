@@ -1,0 +1,5 @@
+User question:
+{question}
+
+Retrieval context:
+{context}

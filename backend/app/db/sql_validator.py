@@ -22,6 +22,15 @@ class SQLValidationResult(BaseModel):
     errors: List[str] = Field(default_factory=list)
 
 
+class SQLTableAuthorizationResult(BaseModel):
+    """Result of comparing parsed physical table references with RBAC permissions."""
+
+    authorized: bool
+    requested_tables: List[str] = Field(default_factory=list)
+    unauthorized_tables: List[str] = Field(default_factory=list)
+    errors: List[str] = Field(default_factory=list)
+
+
 def _allowed_tables() -> Set[str]:
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     return {table["qualified_name"] for table in schema.get("tables", [])}
@@ -43,6 +52,61 @@ def validate_sql(sql: str, allowed_tables: Optional[Set[str]] = None) -> SQLVali
         }, mime_type="application/json")
         if not result.valid:
             mark_span_error_message(span, "; ".join(result.errors))
+        return result
+
+
+def authorize_sql_tables(
+    sql: str,
+    allowed_tables: Set[str],
+    role: Optional[str] = None,
+) -> SQLTableAuthorizationResult:
+    """Authorize every physical T-SQL table reference against an RBAC table allow-list.
+
+    CTE aliases are excluded: only actual schema-qualified database tables are
+    compared. Any parsing or qualification uncertainty denies execution.
+    """
+    with traced_span("sql.authorize", {}, span_kind="CHAIN", input_value=sql) as span:
+        try:
+            statements = parse(sql, dialect="tsql")
+            if len(statements) != 1:
+                raise ValueError("Exactly one SQL statement is required for authorization.")
+            statement = statements[0]
+            cte_aliases = {cte.alias_or_name.lower() for cte in statement.find_all(exp.CTE) if cte.alias_or_name}
+            requested_tables: Set[str] = set()
+            errors: List[str] = []
+            for table in statement.find_all(exp.Table):
+                table_name = table.name
+                if not table.db and table_name.lower() in cte_aliases:
+                    continue
+                if not table.db:
+                    errors.append(f"Table {table_name} is not schema-qualified.")
+                    continue
+                requested_tables.add(f"{table.db}.{table_name}")
+        except Exception as exc:
+            result = SQLTableAuthorizationResult(
+                authorized=False,
+                errors=[f"Unable to safely extract SQL table references: {exc}"],
+            )
+        else:
+            requested = sorted(requested_tables)
+            denied = sorted(set(requested).difference(allowed_tables))
+            result = SQLTableAuthorizationResult(
+                authorized=not errors and not denied,
+                requested_tables=requested,
+                unauthorized_tables=denied,
+                errors=errors,
+            )
+
+        set_span_attributes(span, {
+            "authorization.allowed": result.authorized,
+            "authorization.role": role,
+            "authorization.tables_requested": result.requested_tables,
+            "authorization.tables_denied": result.unauthorized_tables,
+            "authorization.errors": " | ".join(result.errors) if result.errors else None,
+        })
+        set_span_output(span, result.model_dump(), mime_type="application/json")
+        if not result.authorized:
+            mark_span_error_message(span, "; ".join(result.errors) or "Unauthorized SQL table access")
         return result
 
 

@@ -1,0 +1,5 @@
+User question:
+{question}
+
+Available deterministic tools:
+{tools}
