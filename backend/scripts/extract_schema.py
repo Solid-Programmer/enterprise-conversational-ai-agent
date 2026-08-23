@@ -7,31 +7,37 @@ import pyodbc
 # Database Connection Configuration (read from environment variables with defaults)
 # ==============================================================================
 DB_SERVER = os.getenv("DB_SERVER", "localhost")
+_db_port_value = os.getenv("DB_PORT", "").strip()
+DB_PORT = int(_db_port_value) if _db_port_value else None
 DB_NAME = os.getenv("DB_NAME", "AdventureWorks2022")
 DB_DRIVER = os.getenv("DB_DRIVER", "ODBC Driver 18 for SQL Server")
 DB_TRUSTED_CONNECTION = os.getenv("DB_TRUSTED_CONNECTION", "yes")
 DB_TRUST_SERVER_CERTIFICATE = os.getenv("DB_TRUST_SERVER_CERTIFICATE", "yes")
+DB_ENCRYPT = os.getenv("DB_ENCRYPT", "no")
 DB_USER = os.getenv("DB_USER", "")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 
 
 def get_connection():
     """Builds pyodbc connection string and connects to SQL Server."""
-    if DB_USER and DB_PASSWORD:
+    server_target = DB_SERVER if DB_PORT is None or "," in DB_SERVER or "\\" in DB_SERVER else f"tcp:{DB_SERVER},{DB_PORT}"
+    if DB_TRUSTED_CONNECTION.lower() not in {"yes", "true", "1"} and DB_USER and DB_PASSWORD:
         conn_str = (
             f"DRIVER={{{DB_DRIVER}}};"
-            f"SERVER={DB_SERVER};"
+            f"SERVER={server_target};"
             f"DATABASE={DB_NAME};"
             f"UID={DB_USER};"
             f"PWD={DB_PASSWORD};"
+            f"Encrypt={DB_ENCRYPT};"
             f"TrustServerCertificate={DB_TRUST_SERVER_CERTIFICATE};"
         )
     else:
         conn_str = (
             f"DRIVER={{{DB_DRIVER}}};"
-            f"SERVER={DB_SERVER};"
+            f"SERVER={server_target};"
             f"DATABASE={DB_NAME};"
             f"Trusted_Connection={DB_TRUSTED_CONNECTION};"
+            f"Encrypt={DB_ENCRYPT};"
             f"TrustServerCertificate={DB_TRUST_SERVER_CERTIFICATE};"
         )
 

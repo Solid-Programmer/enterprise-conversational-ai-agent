@@ -17,7 +17,7 @@ from app.tools.registry import execute_tool, get_registered_tool
 from app.observability.tracing import mark_span_error, result_summary, set_span_attributes, set_span_output, traced_span
 
 
-MAX_REPAIR_ATTEMPTS = 2
+MAX_REPAIR_ATTEMPTS = 1
 
 
 class SalesOrchestrator:
@@ -38,7 +38,7 @@ class SalesOrchestrator:
         if decision.action == "chat":
             return self._run_chat(question)
         if decision.action == "tool":
-            return await self._run_tool(question, decision.tool_name or "", decision.arguments)
+            return await self._run_tool(question, decision.tool_name or "", decision.arguments, authorization)
         return await self._run_text_to_sql(question, authorization)
 
     def _run_chat(self, question: str) -> ChatResult:
@@ -55,13 +55,35 @@ class SalesOrchestrator:
             answer = "Hello! How can I help with your sales analysis today?"
         return ChatResult(status="success", route="chat", answer=answer, data=None)
 
-    async def _run_tool(self, question: str, tool_name: str, arguments: dict) -> ChatResult:
-        if get_registered_tool(tool_name) is None:
+    async def _run_tool(
+        self,
+        question: str,
+        tool_name: str,
+        arguments: dict,
+        authorization: AuthorizationContext,
+    ) -> ChatResult:
+        tool = get_registered_tool(tool_name)
+        if tool is None:
             return human_review_result(question, "Router selected an unregistered tool.", error=tool_name, route="tool")
+        unauthorized_tables = sorted(tool.required_tables.difference(authorization.allowed_tables))
+        if unauthorized_tables:
+            return ChatResult(
+                status="error",
+                route="tool",
+                tool_name=tool_name,
+                answer="You do not have access to the data required for this request.",
+                message="Tool table access was denied.",
+                metadata={
+                    "authorization_allowed": False,
+                    "unauthorized_tables": unauthorized_tables,
+                },
+            )
         with traced_span("tool.execute", {
             "app.tool_name": tool_name,
             "tool.name": tool_name,
             "tool.parameters": str(arguments),
+            "authorization.tables_required": sorted(tool.required_tables),
+            "authorization.role": authorization.role,
         }, span_kind="TOOL", input_value=str(arguments), input_mime_type="application/json") as span:
             try:
                 data = await run_with_timeout(
@@ -147,7 +169,7 @@ class SalesOrchestrator:
 
         return human_review_result(
             question,
-            "Generated SQL remained invalid or failed after the maximum two repair attempts.",
+            "Generated SQL remained invalid or failed after one repair attempt.",
             last_sql=candidate_sql,
             error=last_error,
             route="text_to_sql",

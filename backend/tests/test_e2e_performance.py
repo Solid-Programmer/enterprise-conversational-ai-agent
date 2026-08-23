@@ -15,6 +15,7 @@ from pathlib import Path
 import time
 from typing import Any, Callable, Coroutine, TypeVar
 
+import pytest
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
@@ -156,19 +157,19 @@ def _install_timing_wrappers(monkeypatch: Any, timings: TimingRecorder) -> None:
         timings.wrap_async("router_decision", orchestrator.route_question),
     )
     monkeypatch.setattr(
-        context_builder,
-        "retrieve_verified_queries",
+        retriever,
+        "search_verified_queries",
         timings.wrap_async(
             "retrieval_verified_queries",
-            context_builder.retrieve_verified_queries,
+            retriever.search_verified_queries,
         ),
     )
     monkeypatch.setattr(
-        context_builder,
-        "retrieve_schema_context",
+        retriever,
+        "search_schema_context",
         timings.wrap_async(
             "retrieval_semantic_schema",
-            context_builder.retrieve_schema_context,
+            retriever.search_schema_context,
         ),
     )
     monkeypatch.setattr(
@@ -291,12 +292,16 @@ def _install_timing_wrappers(monkeypatch: Any, timings: TimingRecorder) -> None:
 
 def _derived_timings(timings: TimingRecorder) -> dict[str, float]:
     """Calculate non-overlapping overhead while respecting parallel retrieval."""
-    retrieval_critical_path = max(
+    qdrant_search_critical_path = max(
         timings.total("retrieval_verified_queries"),
         timings.total("retrieval_semantic_schema"),
     )
+    retrieval_critical_path = timings.total("context_build_total")
     context_assembly = max(
-        timings.total("context_build_total") - retrieval_critical_path,
+        retrieval_critical_path
+        - timings.total("ollama_embeddings_client_initialization")
+        - timings.total("ollama_query_embedding")
+        - qdrant_search_critical_path,
         0,
     )
     known_orchestrator_work = sum(
@@ -349,6 +354,10 @@ def _derived_timings(timings: TimingRecorder) -> dict[str, float]:
     )
     return {
         "retrieval_parallel_critical_path_ms": round(retrieval_critical_path, 2),
+        "qdrant_parallel_search_critical_path_ms": round(
+            qdrant_search_critical_path,
+            2,
+        ),
         "context_assembly_overhead_ms": round(context_assembly, 2),
         "rbac_queries_and_mapping_ms": round(rbac_query_and_mapping, 2),
         "sql_query_fetch_normalize_ms": round(sql_query_fetch_normalize, 2),
@@ -477,6 +486,7 @@ def test_e2e_revenue_2013_mocked_timing(monkeypatch) -> None:
     asyncio.run(_run_mocked())
 
 
+@pytest.mark.live
 def test_e2e_revenue_2013_live_timing_breakdown(monkeypatch) -> None:
     """Benchmark the real application path and persist a machine-readable report."""
     timings = TimingRecorder()

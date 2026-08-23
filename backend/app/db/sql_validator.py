@@ -36,6 +36,31 @@ def _allowed_tables() -> Set[str]:
     return {table["qualified_name"] for table in schema.get("tables", [])}
 
 
+def _physical_table_references(statement: exp.Expression) -> tuple[Set[str], List[str]]:
+    """Return physical table references while excluding in-statement CTE aliases.
+
+    Both semantic validation and per-user authorization must use this one
+    extraction rule. Otherwise a CTE can be accepted by one boundary and
+    rejected by the other.
+    """
+    cte_aliases = {
+        cte.alias_or_name.lower()
+        for cte in statement.find_all(exp.CTE)
+        if cte.alias_or_name
+    }
+    requested_tables: Set[str] = set()
+    errors: List[str] = []
+    for table in statement.find_all(exp.Table):
+        table_name = table.name
+        if not table.db and table_name.lower() in cte_aliases:
+            continue
+        if not table.db:
+            errors.append(f"Table {table_name} is not schema-qualified.")
+            continue
+        requested_tables.add(f"{table.db}.{table_name}")
+    return requested_tables, errors
+
+
 def validate_sql(sql: str, allowed_tables: Optional[Set[str]] = None) -> SQLValidationResult:
     """Validate one read-only Sales T-SQL statement before it reaches the executor."""
     with traced_span("sql.validate", {}, span_kind="CHAIN", input_value=sql) as span:
@@ -71,17 +96,7 @@ def authorize_sql_tables(
             if len(statements) != 1:
                 raise ValueError("Exactly one SQL statement is required for authorization.")
             statement = statements[0]
-            cte_aliases = {cte.alias_or_name.lower() for cte in statement.find_all(exp.CTE) if cte.alias_or_name}
-            requested_tables: Set[str] = set()
-            errors: List[str] = []
-            for table in statement.find_all(exp.Table):
-                table_name = table.name
-                if not table.db and table_name.lower() in cte_aliases:
-                    continue
-                if not table.db:
-                    errors.append(f"Table {table_name} is not schema-qualified.")
-                    continue
-                requested_tables.add(f"{table.db}.{table_name}")
+            requested_tables, errors = _physical_table_references(statement)
         except Exception as exc:
             result = SQLTableAuthorizationResult(
                 authorized=False,
@@ -129,14 +144,14 @@ def _validate_sql(sql: str, allowed_tables: Optional[Set[str]] = None) -> SQLVal
         return SQLValidationResult(valid=False, errors=["SQL must be a SELECT statement or CTE leading to SELECT."])
 
     permitted = allowed_tables or _allowed_tables()
-    errors: List[str] = []
-    for table in statement.find_all(exp.Table):
-        schema_name = table.db
-        table_name = table.name
-        qualified_name = f"{schema_name}.{table_name}" if schema_name else table_name
-        if not schema_name:
-            errors.append(f"Table {table_name} must be fully qualified with the Sales schema.")
-        elif schema_name != "Sales":
+    requested_tables, unqualified_errors = _physical_table_references(statement)
+    errors: List[str] = [
+        error.replace(" is not schema-qualified.", " must be fully qualified with the Sales schema.")
+        for error in unqualified_errors
+    ]
+    for qualified_name in requested_tables:
+        schema_name, _ = qualified_name.split(".", maxsplit=1)
+        if schema_name != "Sales":
             errors.append(f"Schema {schema_name} is not allowed.")
         elif qualified_name not in permitted:
             errors.append(f"Table {qualified_name} is not in the allowed semantic schema.")

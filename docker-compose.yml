@@ -15,6 +15,12 @@ services:
     depends_on:
       - qdrant
       - phoenix
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   qdrant:
     image: qdrant/qdrant:latest

@@ -28,7 +28,7 @@ async def route_question(question: str) -> RouteDecision:
 
     tools = [definition.model_dump() for definition in list_tool_definitions()]
     decision = await generate_structured(
-        system_prompt=load_prompt("router_system_v3.txt"),
+        system_prompt=load_prompt("router_system_v1.txt"),
         user_prompt=render_prompt("router_user_v1.txt", question=question, tools=tools),
         response_model=RouteDecision,
         temperature=0,

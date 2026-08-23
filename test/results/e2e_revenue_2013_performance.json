@@ -1,165 +1,164 @@
 {
-  "generated_at_utc": "2026-08-22T11:13:06.985582+00:00",
+  "generated_at_utc": "2026-08-22T17:28:36.293557+00:00",
   "query": "Please Provide total revenue in 2013",
   "authentication_mode": "Auth0 identity override; real SQL-backed RBAC still measured",
   "http_status_code": 200,
   "timings": {
     "rbac_db_connection": {
-      "total_ms": 21.38,
+      "total_ms": 5.16,
       "calls": 1,
       "samples_ms": [
-        21.38
+        5.16
       ]
     },
     "rbac_context_lookup": {
-      "total_ms": 60.13,
+      "total_ms": 22.08,
       "calls": 1,
       "samples_ms": [
-        60.13
+        22.08
       ]
     },
     "ollama_chat_request": {
-      "total_ms": 3697.22,
+      "total_ms": 25840.73,
       "calls": 3,
       "samples_ms": [
-        1181.2,
-        1266.64,
-        1249.38
+        1835.45,
+        22828.4,
+        1176.88
       ]
     },
     "router_decision": {
-      "total_ms": 1364.78,
+      "total_ms": 2026.75,
       "calls": 1,
       "samples_ms": [
-        1364.78
+        2026.75
       ]
     },
     "ollama_embeddings_client_initialization": {
-      "total_ms": 0.01,
-      "calls": 2,
+      "total_ms": 190.64,
+      "calls": 1,
       "samples_ms": [
-        0.01,
-        0.0
+        190.64
       ]
     },
     "ollama_query_embedding": {
-      "total_ms": 4635.87,
-      "calls": 2,
+      "total_ms": 15612.14,
+      "calls": 1,
       "samples_ms": [
-        2309.93,
-        2325.94
+        15612.14
       ]
     },
     "qdrant_client_initialization": {
-      "total_ms": 484.1,
+      "total_ms": 436.43,
       "calls": 2,
       "samples_ms": [
-        241.19,
-        242.91
+        193.19,
+        243.24
       ]
     },
     "qdrant_vector_search": {
-      "total_ms": 70.6,
+      "total_ms": 80.33,
       "calls": 2,
       "samples_ms": [
-        37.12,
-        33.48
-      ]
-    },
-    "retrieval_semantic_schema": {
-      "total_ms": 2589.2,
-      "calls": 1,
-      "samples_ms": [
-        2589.2
+        46.19,
+        34.14
       ]
     },
     "retrieval_verified_queries": {
-      "total_ms": 2603.39,
+      "total_ms": 437.0,
       "calls": 1,
       "samples_ms": [
-        2603.39
+        437.0
+      ]
+    },
+    "retrieval_semantic_schema": {
+      "total_ms": 278.18,
+      "calls": 1,
+      "samples_ms": [
+        278.18
       ]
     },
     "context_build_total": {
-      "total_ms": 2603.7,
+      "total_ms": 16275.44,
       "calls": 1,
       "samples_ms": [
-        2603.7
+        16275.44
       ]
     },
     "sql_generation": {
-      "total_ms": 1267.63,
+      "total_ms": 22830.0,
       "calls": 1,
       "samples_ms": [
-        1267.63
+        22830.0
       ]
     },
     "sql_validation": {
-      "total_ms": 11.28,
+      "total_ms": 16.88,
       "calls": 1,
       "samples_ms": [
-        11.28
+        16.88
       ]
     },
     "sql_table_authorization": {
-      "total_ms": 0.48,
+      "total_ms": 0.46,
       "calls": 1,
       "samples_ms": [
-        0.48
+        0.46
       ]
     },
     "sql_db_connection": {
-      "total_ms": 2.08,
+      "total_ms": 6.39,
       "calls": 1,
       "samples_ms": [
-        2.08
+        6.39
       ]
     },
     "result_masking": {
-      "total_ms": 0.01,
+      "total_ms": 0.02,
       "calls": 1,
       "samples_ms": [
-        0.01
+        0.02
       ]
     },
     "sql_execution": {
-      "total_ms": 3319.79,
+      "total_ms": 41.5,
       "calls": 1,
       "samples_ms": [
-        3319.79
+        41.5
       ]
     },
     "orchestrator_handle": {
-      "total_ms": 8567.69,
+      "total_ms": 41191.1,
       "calls": 1,
       "samples_ms": [
-        8567.69
+        41191.1
       ]
     },
     "answer_generation": {
-      "total_ms": 1251.35,
+      "total_ms": 1178.49,
       "calls": 1,
       "samples_ms": [
-        1251.35
+        1178.49
       ]
     },
     "http_total": {
-      "total_ms": 9886.0,
+      "total_ms": 42397.87,
       "calls": 1,
       "samples_ms": [
-        9886.0
+        42397.87
       ]
     }
   },
   "derived_timings": {
-    "retrieval_parallel_critical_path_ms": 2603.39,
-    "context_assembly_overhead_ms": 0.3,
-    "rbac_queries_and_mapping_ms": 38.75,
-    "sql_query_fetch_normalize_ms": 3317.7,
-    "serial_llm_stage_total_ms": 3883.75,
-    "structured_prompt_parse_trace_overhead_ms": 186.53,
-    "orchestrator_unattributed_overhead_ms": 0.05,
-    "http_auth_validation_serialization_overhead_ms": 6.82
+    "retrieval_parallel_critical_path_ms": 16275.44,
+    "qdrant_parallel_search_critical_path_ms": 437.0,
+    "context_assembly_overhead_ms": 35.67,
+    "rbac_queries_and_mapping_ms": 16.92,
+    "sql_query_fetch_normalize_ms": 35.09,
+    "serial_llm_stage_total_ms": 26035.24,
+    "structured_prompt_parse_trace_overhead_ms": 194.51,
+    "orchestrator_unattributed_overhead_ms": 0.07,
+    "http_auth_validation_serialization_overhead_ms": 6.19
   },
   "response": {
     "status": "success",
@@ -175,8 +174,8 @@
     "message": null,
     "metadata": {
       "repair_attempts": 0,
-      "trace_id": "ff1c949de950595b03823e415ef52d8d",
-      "request_id": "e600a022-4fb7-4f35-9d72-1485dc2aeeb5"
+      "trace_id": "7f7b490e9e59034fa02d8ed9842baac2",
+      "request_id": "30cad968-1482-4f93-ac8e-e44f1eca494d"
     }
   }
 }

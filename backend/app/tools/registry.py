@@ -35,22 +35,39 @@ _TOOLS: Dict[str, RegisteredTool] = {
     "get_sales_performance": RegisteredTool(
         _definition("get_sales_performance", "Overall sales, channel, territory, and monthly performance analysis.", "territory_id", "Optional SalesTerritory integer ID."),
         get_sales_performance,
+        frozenset({"Sales.SalesOrderHeader", "Sales.SalesTerritory"}),
     ),
     "get_customer_analysis": RegisteredTool(
         _definition("get_customer_analysis", "Customer purchasing behavior, rankings, reasons, and payment-type analysis.", "customer_id", "Optional Customer integer ID."),
         get_customer_analysis,
+        frozenset({
+            "Sales.Customer", "Sales.Store", "Sales.SalesOrderHeader",
+            "Sales.SalesOrderHeaderSalesReason", "Sales.SalesReason", "Sales.CreditCard",
+        }),
     ),
     "get_salesperson_performance": RegisteredTool(
         _definition("get_salesperson_performance", "Salesperson revenue, quota, territory, and trend analysis.", "salesperson_id", "Optional SalesPerson BusinessEntity integer ID."),
         get_salesperson_performance,
+        frozenset({
+            "Sales.SalesOrderHeader", "Sales.SalesPersonQuotaHistory", "Sales.SalesPerson",
+            "Sales.SalesTerritory", "Sales.SalesTerritoryHistory",
+        }),
     ),
     "get_promotion_performance": RegisteredTool(
         _definition("get_promotion_performance", "Special-offer revenue, units, discount, and ranking analysis.", "special_offer_id", "Optional SpecialOffer integer ID."),
         get_promotion_performance,
+        frozenset({
+            "Sales.SpecialOfferProduct", "Sales.SalesOrderDetail", "Sales.SalesOrderHeader",
+            "Sales.SpecialOffer",
+        }),
     ),
     "get_currency_sales_analysis": RegisteredTool(
         _definition("get_currency_sales_analysis", "Territory, country, local-currency, and recorded-rate analysis.", "country_region_code", "Optional country/region code, for example US or FR.", id_type="string"),
         get_currency_sales_analysis,
+        frozenset({
+            "Sales.SalesOrderHeader", "Sales.SalesTerritory", "Sales.CountryRegionCurrency",
+            "Sales.Currency", "Sales.CurrencyRate",
+        }),
     ),
 }
 

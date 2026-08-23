@@ -26,7 +26,7 @@ Unsafe or repeatedly unsuccessful operations return a structured `requires_human
 - 150 verified natural-language-to-SQL retrieval examples
 - Single-statement, read-only Sales SQL validation with SQLGlot
 - Per-table authorization for generated SQL
-- Up to two bounded SQL repair attempts
+- One bounded SQL repair attempt
 - Exact-name masking for selected credit-card result fields
 - Grounded natural-language answer generation from bounded result previews
 - Stage-level timeouts and controlled `500`/`504` responses
@@ -117,7 +117,7 @@ The currency tool deliberately does not convert recorded amounts because the cod
 
 ## Text-to-SQL and retrieval
 
-The Text-to-SQL path builds context from:
+The Text-to-SQL path embeds the question once, reuses that vector for two concurrent Qdrant searches, and builds context from:
 
 - the five nearest entries in the `verified_queries` collection;
 - the eight nearest chunks in the `semantic_schema` collection; and
@@ -140,7 +140,7 @@ Generated SQL must:
 - use only tables in the curated semantic schema; and
 - reference only tables allowed for the authenticated user's role.
 
-Validation or execution failures are sent to the repair model with the original question, failed SQL, error, and the same retrieval context. The orchestrator allows at most two repair attempts.
+Validation or execution failures are sent to the repair model with the original question, failed SQL, error, and the same retrieval context. The orchestrator allows one repair attempt.
 
 ## Authentication and authorization
 
@@ -219,7 +219,7 @@ Copy-Item .env.example .env
 
 On macOS/Linux, use `cp .env.example .env`. Replace the database and Auth0 values in `.env`.
 
-If SQL Server uses a non-default port, include it in `DB_SERVER` using the format supported by the ODBC driver, for example `DB_SERVER=localhost,1433`. The current connection builder does not consume the separate `DB_PORT` setting.
+`DB_SERVER` can be a host, a named instance, or a host with an explicit port. Leave `DB_PORT` unset to let ODBC resolve `DB_SERVER` directly. Set `DB_PORT` only when an explicit TCP target is required; the backend then uses `tcp:DB_SERVER,DB_PORT`.
 
 ### 3. Configure the frontend Auth0 client
 
@@ -253,7 +253,6 @@ If Ollama already runs as a service, only the two `pull` commands are needed.
 ### 6. Install and start the backend
 
 ```bash
-cd backend
 python -m venv .venv
 ```
 
@@ -272,15 +271,17 @@ source .venv/bin/activate
 Then install and run:
 
 ```bash
-python -m pip install -r requirements.txt
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+python -m pip install -e ".[dev]"
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-FastAPI exposes interactive documentation at `http://localhost:8000/docs` and ReDoc at `http://localhost:8000/redoc`. There is no dedicated health endpoint.
+Run these commands from the repository root. The editable installation makes the `app` package available consistently to Uvicorn, scripts, IDEs, and tests.
+
+FastAPI exposes interactive documentation at `http://localhost:8000/docs`, ReDoc at `http://localhost:8000/redoc`, and an unauthenticated liveness probe at `http://localhost:8000/health`.
 
 ### 7. Build the retrieval indexes
 
-With Ollama and Qdrant running, execute from `backend/`:
+With Ollama and Qdrant running, execute from the repository root:
 
 ```bash
 python -m app.retrieval.index_verified_queries --recreate
@@ -391,17 +392,27 @@ Pydantic loads the backend `.env` from the repository root. Variables absent fro
 | Variable | Default/example | Purpose |
 | --- | --- | --- |
 | `APP_NAME` | `Enterprise Conversational AI Agent` | FastAPI title and OpenTelemetry service name |
-| `DB_SERVER` | `localhost` | SQL Server host/instance; include port here when necessary |
-| `DB_PORT` | `1433` | Present in settings but currently unused by the connection string |
+| `DB_SERVER` | `localhost` | SQL Server host or named instance |
+| `DB_PORT` | unset | Optional TCP port appended to an ordinary `DB_SERVER` host |
 | `DB_NAME` | `AdventureWorks2022` | SQL Server database |
 | `DB_USER` | `sa` in example | SQL login; used only when both user and password are set |
 | `DB_PASSWORD` | example placeholder | SQL login password; never commit the real value |
 | `DB_TRUSTED_CONNECTION` | `true` | Enables trusted auth when SQL credentials are absent |
 | `DB_TRUST_SERVER_CERTIFICATE` | `true` | Controls ODBC `TrustServerCertificate` |
+| `DB_ENCRYPT` | `false` | Controls ODBC transport encryption; use `false` for the local Windows-auth setup, and `true` with a valid certificate in production |
 | `DB_DRIVER` | `ODBC Driver 18 for SQL Server` | Installed ODBC driver name |
+| `DB_POOL_SIZE` | `5` | Persistent SQL connections retained per backend process |
+| `DB_MAX_OVERFLOW` | `5` | Temporary additional SQL connections permitted under load |
+| `DB_POOL_RECYCLE_SECONDS` | `1800` | Recreates pooled connections before stale network state accumulates |
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama chat and embedding API base URL |
-| `OLLAMA_MODEL` | `llama3.2` | Used only by the placeholder `OllamaClient`, not active Qwen calls |
+| `OLLAMA_MODEL` | `llama3.2` | Reserved generation-model setting; active Qwen calls are currently hard-coded separately |
 | `OLLAMA_EMBED_MODEL` | `nomic-embed-text` | Retrieval embedding model |
+| `OLLAMA_KEEP_ALIVE` | `30m` | Requested Ollama residency for generation and embedding models |
+| `WARM_RUNTIME_ON_STARTUP` | `true` | Loads Ollama models, Qdrant clients, and the SQL pool at process startup; failures are logged but do not stop startup |
+| `WARM_GENERATION_MODEL_ON_STARTUP` | `true` | Controls Qwen warm-up independently |
+| `WARM_EMBEDDING_MODEL_ON_STARTUP` | `true` | Controls embedding-model warm-up independently |
+| `WARMUP_TIMEOUT_SECONDS` | `15` | Per-resource startup warm-up time limit |
+| `CORS_ALLOWED_ORIGINS` | Local Vite origins | JSON array of browser origins allowed to call the API with credentials |
 | `QDRANT_URL` | `http://localhost:6333` | Qdrant service URL |
 | `PHOENIX_ENDPOINT` | `http://localhost:6006/v1/traces` | OTLP/HTTP trace endpoint |
 | `PHOENIX_PROJECT_NAME` | `enterprise-conversational-agent` | Phoenix project name/header |
@@ -410,6 +421,8 @@ Pydantic loads the backend `.env` from the repository root. Variables absent fro
 | `AUTH0_AUDIENCE` | required | Auth0 API identifier/audience |
 
 The active router, SQL generator, repair, and answer generator use the code constant `qwen2.5:7b`; they do not read `OLLAMA_MODEL`.
+
+On a host that cannot hold both generation and embedding models at once, disable one model warm-up or run the workloads on separate Ollama instances. Keeping both models alive on an undersized GPU causes model eviction rather than a performance gain.
 
 ### Timeouts
 
@@ -422,9 +435,11 @@ The active router, SQL generator, repair, and answer generator use the code cons
 | `ANSWER_GENERATION_TIMEOUT_SECONDS` | `30` | Grounded answer generation |
 | `RETRIEVAL_TIMEOUT_SECONDS` | `30` | Qdrant/embedding retrieval |
 | `TOOL_TIMEOUT_SECONDS` | `20` | Deterministic tool wrapper |
-| `SQL_EXECUTION_TIMEOUT_SECONDS` | `15` | ODBC query timeout and async wrapper |
+| `SQL_EXECUTION_TIMEOUT_SECONDS` | `60` | ODBC query timeout and async wrapper |
 
 The frontend aborts chat requests after 130 seconds, slightly after the backend's default overall limit.
+
+When a SQL statement fails or reaches its ODBC timeout, the backend invalidates the pooled connection before closing it. The pool discards that connection and opens a fresh one for a later request.
 
 ### Frontend
 
@@ -445,22 +460,20 @@ Spans include `chat.request`, `router.decide`, both retrievals, `text_to_sql.gen
 
 ### Backend unit and mocked integration tests
 
-Run from `backend/` so `app` is importable:
+Run from the repository root:
 
 ```bash
-cd backend
-python -m pytest tests -p no:cacheprovider -k "not live_timing_breakdown"
+python -m pytest -m "not live"
 ```
 
-This excludes the real service-dependent timing test while covering timeouts, chat routing, masking, table authorization, and the mocked end-to-end revenue flow. `test_sql_validator.py` and `test_text_to_sql.py` currently contain placeholder assertions only.
+This excludes the `live`-marked service-dependent timing test while covering timeouts, chat routing, masking, table authorization, CTE validation, connection-string construction, and the mocked end-to-end revenue flow. `test_text_to_sql.py` currently contains placeholder assertions only.
 
 ### Live end-to-end performance test
 
 This requires Ollama, both Qdrant indexes, SQL Server, valid environment configuration, and accessible data:
 
 ```bash
-cd backend
-python -m pytest tests/test_e2e_performance.py::test_e2e_revenue_2013_live_timing_breakdown -s -p no:cacheprovider
+python -m pytest -m live -s
 ```
 
 The live benchmark calls the real FastAPI `POST /api/chat` boundary and measures:
@@ -468,7 +481,7 @@ The live benchmark calls the real FastAPI `POST /api/chat` boundary and measures
 - Auth0 verification when `E2E_AUTH0_ACCESS_TOKEN` is supplied;
 - SQL-backed RBAC connection, queries, and mapping;
 - routing and each Ollama chat request;
-- both concurrent query embeddings and Qdrant vector searches;
+- one shared query embedding and two concurrent Qdrant vector searches;
 - context assembly, SQL generation, validation, and table authorization;
 - SQL connection, query/fetch/normalization, and result masking;
 - answer generation, orchestration overhead, response serialization, and total HTTP time.
@@ -485,11 +498,36 @@ npm ci
 npm run build
 ```
 
-### Legacy Qwen benchmark assets
+### One-command checks and CI
 
-`test/` contains a 20-case `SalesOrderHeader` benchmark, a six-case failed subset, runner, and saved result snapshot. The snapshot records 20/20 execution successes and 17/20 semantic matches.
+After installing GNU Make, `make ci` runs mocked backend tests, the frontend production build, and a backend container build. The same three checks run on every pull request and push to `main` through `.github/workflows/ci.yml`.
 
-The runner is legacy code and currently imports the removed `generate_text_to_sql_qwen` function. Treat the saved JSON as historical evidence, not a current result, until the runner is migrated to the async structured generation API.
+On systems without Make, run the portable commands directly:
+
+```bash
+python -m pytest -m "not live"
+npm --prefix frontend ci
+npm --prefix frontend run build
+docker build -t enterprise-ai-agent-backend ./backend
+```
+
+### Text-to-SQL semantic benchmark
+
+`test/` contains a 20-case `SalesOrderHeader` semantic benchmark, a six-case failed subset, a runnable benchmark script, and a saved historical result snapshot. The benchmark uses the active retrieval, structured Text-to-SQL generation, SQL validation, and safe execution path. It is intentionally not part of normal CI because it requires Ollama, Qdrant, SQL Server, and the semantic indexes.
+
+Run it from the repository root after installing `.[dev]` and starting those services:
+
+```bash
+python test/run_qwen_tests.py
+```
+
+For a quick smoke benchmark that avoids rewriting the tracked historical output:
+
+```bash
+python test/run_qwen_tests.py --max-cases 3 --output test/results/qwen_smoke_results.json
+```
+
+The report records generated SQL, validation failures, execution success, semantic-result match, alias match, and exact-SQL match. Generated SQL is validated before it can execute.
 
 ## Maintaining schema and retrieval data
 
@@ -540,7 +578,7 @@ enterprise-ai-agent/
 |   |-- Dockerfile
 |   |-- package.json
 |   `-- vite.config.ts
-|-- test/                        # Legacy Qwen benchmark assets
+|-- test/                        # Opt-in Text-to-SQL benchmark data and runner
 |-- .env.example
 |-- docker-compose.yml
 `-- README.md
@@ -548,19 +586,12 @@ enterprise-ai-agent/
 
 ## Current limitations
 
-- **Deterministic tool authorization:** fixed tools do not enforce a user's per-table allow-list, although a valid active RBAC mapping is required.
-- **Containerized SQL driver:** the backend image lacks Microsoft's ODBC Driver 18 runtime.
 - **Hard-coded generation model:** active LLM calls use `qwen2.5:7b`; `OLLAMA_MODEL` does not configure them.
-- **Unused database port:** `DB_PORT` is not added to the ODBC connection string.
-- **CTE validation mismatch:** prompts allow a CTE leading to `SELECT`, but the validator treats CTE aliases as unqualified tables and rejects them. Static trusted tool queries can still use CTEs.
 - **Exact-name masking only:** a sensitive field aliased to a different result name is not detected.
 - **No RBAC/schema migrations:** database setup and Auth0-subject provisioning are external.
 - **Single-turn backend:** no conversation persistence, memory, session store, or follow-up context.
 - **No streaming:** the API returns one complete response after orchestration.
-- **No health endpoint or CORS middleware:** local development relies on Vite's proxy.
-- **Placeholder modules:** `llm/ollama_client.py`, `sales/repository.py`, and `sales/service.py` are outside the active path.
-- **Partial tests:** Text-to-SQL and validator placeholder tests do not cover their full contracts; the live test is external-service dependent and has no dedicated marker.
-- **Legacy benchmark runner:** the runner under `test/` targets a removed API.
+- **Partial tests:** Text-to-SQL generation still lacks focused contract tests; external-service benchmarks remain opt-in.
 - **No license file:** reuse terms have not been declared.
 
 ## Troubleshooting
@@ -595,4 +626,4 @@ Inspect `metadata.timeout_stage`, backend logs, and the Phoenix trace ID. Keep t
 
 ### Tests cannot import `app`
 
-Run pytest from `backend/`, or add `backend` to `PYTHONPATH`. Running `pytest backend/tests` from the repository root does not configure that import path.
+Install the repository once from its root with `python -m pip install -e ".[dev]"`. Afterwards, `python -m pytest` is location-independent and uses the root `pyproject.toml` configuration.

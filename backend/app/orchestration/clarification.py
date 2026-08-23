@@ -10,7 +10,7 @@ def clarification_result(question: str, decision: RouteDecision) -> ChatResult:
     with traced_span("clarification.generate", {
         "failure.reason": decision.reason,
     }, span_kind="CHAIN", input_value=question) as span:
-        prompt = decision.clarification_question or load_prompt("clarification_default_v2.txt")
+        prompt = decision.clarification_question or load_prompt("clarification_default_v1.txt")
         set_span_attributes(span, {"clarification.question": prompt})
         set_span_output(span, prompt)
         return ChatResult(status="clarification_required", message=prompt, metadata={"original_question": question, "reason": decision.reason})

@@ -1,11 +1,10 @@
-"""Build bounded Text-to-SQL context from independent Qdrant retrievals."""
+"""Build bounded Text-to-SQL context from shared-embedding Qdrant retrievals."""
 
-import asyncio
 import json
 from pathlib import Path
 from typing import Any, Dict, List
 
-from app.retrieval.retriever import retrieve_schema_context, retrieve_verified_queries
+from app.retrieval.retriever import retrieve_text_to_sql_context
 
 
 BUSINESS_RULES_PATH = Path(__file__).resolve().parent.parent / "sales" / "schema" / "sales_business_rules.json"
@@ -20,10 +19,11 @@ def _format_hits(title: str, hits: List[Dict[str, Any]]) -> str:
 
 
 async def build_text_to_sql_context(question: str) -> str:
-    """Independently retrieve examples and schema context, then combine both with canonical rules."""
-    verified_examples, schema_chunks = await asyncio.gather(
-        retrieve_verified_queries(question, top_k=5),
-        retrieve_schema_context(question, top_k=8),
+    """Retrieve both contexts from one embedding, then add canonical rules."""
+    verified_examples, schema_chunks = await retrieve_text_to_sql_context(
+        question,
+        verified_top_k=5,
+        schema_top_k=8,
     )
     rules = json.loads(BUSINESS_RULES_PATH.read_text(encoding="utf-8"))
     global_rules = rules.get("global_anti_hallucination_rules", [])

@@ -57,6 +57,7 @@ async def generate_structured(
                 messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
                 format=response_model.model_json_schema(),
                 stream=False,
+                keep_alive=settings.OLLAMA_KEEP_ALIVE,
                 options=options,
             ),
             timeout_seconds=timeout_seconds,
@@ -78,6 +79,29 @@ async def generate_structured(
         if result_attributes:
             set_span_attributes(span, result_attributes(result))
         return result
+
+
+async def warm_generation_model() -> None:
+    """Load the generation model and request the configured Ollama residency."""
+    await run_with_timeout(
+        get_ollama_client().generate(
+            model=MODEL_NAME,
+            prompt="",
+            stream=False,
+            keep_alive=settings.OLLAMA_KEEP_ALIVE,
+            options={"num_predict": 0},
+        ),
+        timeout_seconds=settings.WARMUP_TIMEOUT_SECONDS,
+        stage="runtime.warm_generation_model",
+    )
+
+
+async def close_ollama_client() -> None:
+    """Release the process-scoped asynchronous transport at shutdown."""
+    global _client
+    if _client is not None:
+        await _client.aclose()
+        _client = None
 
 
 async def generate_text_to_sql(question: str, context: str) -> SQLGeneration:

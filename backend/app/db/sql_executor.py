@@ -35,14 +35,23 @@ def _normalize_value(value: Any) -> Any:
     return value
 
 
+def _invalidate_failed_connection(connection: Any) -> None:
+    """Discard a pooled connection after a database error or query timeout."""
+    invalidate = getattr(connection, "invalidate", None)
+    if callable(invalidate):
+        invalidate()
+
+
 def execute_validated_sql(validation: SQLValidationResult, params: tuple = ()) -> List[Dict[str, Any]]:
     """Execute only a previously valid SQLGlot result and return JSON-serializable rows."""
     if not validation.valid or not validation.normalized_sql:
         raise ValueError("Only successfully validated SQL can be executed.")
     with traced_span("sql.execute", {}, span_kind="TOOL", input_value=validation.normalized_sql) as span:
-        conn = get_db_connection()
+        conn = None
         try:
-            conn.timeout = int(settings.SQL_EXECUTION_TIMEOUT_SECONDS)
+            conn = get_db_connection()
+            driver_connection = getattr(conn, "driver_connection", conn)
+            driver_connection.timeout = int(settings.SQL_EXECUTION_TIMEOUT_SECONDS)
             cursor = conn.cursor()
             cursor.execute(validation.normalized_sql, params)
             if not cursor.description:
@@ -55,10 +64,17 @@ def execute_validated_sql(validation: SQLValidationResult, params: tuple = ()) -
             set_span_output(span, result_summary(results), mime_type="application/json")
             return results
         except Exception as exc:
+            if conn is not None:
+                try:
+                    _invalidate_failed_connection(conn)
+                except Exception:
+                    # The original database failure is the useful error to return.
+                    pass
             set_span_attributes(span, {"sql.execution_success": False, "failure.stage": "sql.execute", "failure.reason": str(exc)})
             raise SQLExecutionError(str(exc)) from exc
         finally:
-            conn.close()
+            if conn is not None:
+                conn.close()
 
 
 async def execute_validated_sql_with_timeout(

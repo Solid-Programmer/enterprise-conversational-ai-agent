@@ -6,13 +6,16 @@ import logging
 import uuid
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
 from app.api.chat import router as chat_router
 from app.core.config import settings
+from app.db.connection import dispose_db_engine, get_db_engine
 from app.core.execution import StageTimeoutError, run_with_timeout
+from app.llm.qwen_client import close_ollama_client, warm_generation_model
 from app.observability.tracing import (
     INPUT_MIME_TYPE,
     OPENINFERENCE_SPAN_KIND,
@@ -22,21 +25,56 @@ from app.observability.tracing import (
     shutdown_tracing,
     trace_id,
 )
+from app.retrieval.retriever import (
+    close_retrieval_clients,
+    get_embedding_client,
+    warm_retrieval_clients,
+)
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     setup_tracing()
+    if settings.WARM_RUNTIME_ON_STARTUP:
+        warmups = {
+            "Qdrant clients": asyncio.to_thread(warm_retrieval_clients),
+            "SQL connection pool": asyncio.to_thread(get_db_engine),
+        }
+        if settings.WARM_GENERATION_MODEL_ON_STARTUP:
+            warmups["generation model"] = warm_generation_model()
+        if settings.WARM_EMBEDDING_MODEL_ON_STARTUP:
+            warmups["embedding model"] = asyncio.to_thread(get_embedding_client().warm)
+        outcomes = await asyncio.gather(*warmups.values(), return_exceptions=True)
+        for name, outcome in zip(warmups, outcomes):
+            if isinstance(outcome, Exception):
+                logger.warning("Runtime warm-up failed for %s: %s", name, outcome)
     try:
         yield
     finally:
+        await close_ollama_client()
+        close_retrieval_clients()
+        dispose_db_engine()
         shutdown_tracing()
 
 
 app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+    max_age=600,
+)
 app.include_router(chat_router)
 _tracer = trace.get_tracer(__name__)
 logger = logging.getLogger(__name__)
+
+
+@app.get("/health", tags=["operations"])
+async def health() -> dict[str, str]:
+    """Liveness probe that does not depend on SQL Server, Ollama, or Qdrant."""
+    return {"status": "ok", "service": settings.APP_NAME}
 
 
 @app.middleware("http")
