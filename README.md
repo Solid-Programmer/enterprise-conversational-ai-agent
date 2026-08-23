@@ -83,6 +83,70 @@ flowchart LR
 
 Each API request is independent. The browser retains visible messages for the current page session, but conversation history is not sent to the backend or used by the models.
 
+### Deployment topology and trust boundaries
+
+```mermaid
+flowchart TB
+    USER[Browser] -->|HTTPS in a public deployment| EDGE[Reverse proxy / TLS termination]
+    EDGE --> FE[frontend: nginx on port 80]
+    FE -->|relative /api proxy| BE[backend: FastAPI on port 8000]
+    USER -->|OAuth redirect and login| AUTH0[Auth0]
+    FE -->|Bearer access token| BE
+
+    subgraph PRIVATE[Private Docker network]
+        BE --> SQL[(sqlserver: AdventureWorks2022 + rbac)]
+        BE --> QD[(qdrant: semantic_schema + verified_queries)]
+        BE --> OL[ollama: Qwen + embeddings]
+        BE -. OTLP/HTTP traces .-> PH[phoenix]
+    end
+
+    SQL --- SQLVOL[(sqlserver_data)]
+    QD --- QDVOL[(qdrant_data)]
+    OL --- OLVOL[(ollama_data)]
+    PH --- PHVOL[(phoenix_data)]
+```
+
+For local development, Compose exposes service ports for inspection. For an internet-facing deployment, only the reverse proxy should accept public traffic (normally ports `80` and `443`). SQL Server, Qdrant, Ollama, and Phoenix must stay on the private Docker network; restrict SSH and store `.env` only on the server.
+
+### System design decisions and trade-offs
+
+| Decision | Why it exists | Trade-off and next step |
+| --- | --- | --- |
+| Compose on one Linux host | Reproducible, low-operations deployment of six services for a portfolio/demo environment | This is a single-host availability boundary. Move stateful services to managed or replicated infrastructure only when availability and concurrent traffic justify it. |
+| Local Ollama models | Keeps model data local, avoids per-token API cost, and permits offline development | CPU-only inference can be slow. Add a GPU host or a hosted model provider when response latency or concurrency becomes important. |
+| React static build + nginx API proxy | The browser calls relative `/api`, so it never needs an internal Docker hostname | Auth0 SPA configuration is build-time configuration; rebuild the frontend after changing `VITE_AUTH0_*` values. |
+| SQL Server as the RBAC source of truth | User/role/table permissions are resolved at request time alongside business data | Database restore, RBAC migrations, and subject provisioning are external prerequisites and must be automated before a real production rollout. |
+| Separate schema and verified-query collections | Schema chunks provide structural grounding; verified examples provide intent and SQL-pattern grounding | Both collections must be rebuilt after changing their source data or embedding model. |
+| SQLGlot validation, table authorization, and result masking | Applies layered controls before execution and before data reaches LLMs, traces, or clients | Masking is exact-name based, and deterministic tools do not yet check the per-table allow-list. Strengthen these controls before handling broader sensitive data. |
+| Phoenix/OpenTelemetry tracing | Makes request-level timing, model stages, retrieval, and errors diagnosable | Trace retention and access control need an operational policy before handling real user data at scale. |
+| Bounded synchronous request flow | Keeps the demo architecture understandable and gives callers a clear timeout/error contract | Long-running jobs, streaming, retries, and human-review queues are intentionally deferred; add them when workload requirements demand them. |
+
+### What this system supports now
+
+- Authenticated, single-turn Sales analytics for mapped users and permitted tables.
+- Deterministic analytics tools and guarded retrieval-assisted Text-to-SQL.
+- Local model inference, reproducible Qdrant indexing, tracing, health checks, and CI validation.
+- A production-style local Compose deployment with persistent state for database, vector data, models, and traces.
+
+### What is intentionally not claimed
+
+- Multi-region/high-availability deployment, horizontal autoscaling, or enterprise-scale concurrency.
+- Database/RBAC migration automation, a bundled AdventureWorks restore asset, or automated initial data seeding.
+- Conversation memory, token streaming, human approval workflows, and background job processing.
+- A publicly operated production service. Deploying publicly requires HTTPS, firewalling, backups, secret management, and operational monitoring.
+
+### Interview discussion guide
+
+Use this project to explain the following sequence:
+
+1. **Problem:** business users need natural-language Sales analysis without unrestricted database access.
+2. **Design:** authenticate with Auth0, resolve SQL-backed RBAC, select a bounded route, retrieve trusted context, then enforce SQL validation and table authorization immediately before execution.
+3. **Safety:** use static parameterized SQL for common analytics, allow only read-only generated SQL, and mask sensitive returned fields at the execution boundary.
+4. **Reliability:** bound every expensive stage, expose a public liveness endpoint, use Docker health checks, and inspect Phoenix child spans to identify the actual slow stage.
+5. **Trade-offs:** a single-host Compose stack and local models optimize cost and learning velocity; GPU/hosted inference, queues, migrations, streaming, and high availability are deliberate future extensions, not omitted requirements.
+
+The strongest live demonstration is one deterministic query, one Text-to-SQL query, the corresponding Phoenix trace, and the CI workflow passing after a commit.
+
 ## Technology stack
 
 | Layer | Technology |
@@ -97,7 +161,7 @@ Each API request is independent. The browser retains visible messages for the cu
 | Authentication | Auth0 OAuth 2.0/OIDC access tokens, RS256 JWKS |
 | Authorization | Application RBAC tables in SQL Server |
 | Observability | OpenTelemetry OTLP/HTTP and Arize Phoenix |
-| Packaging | Docker Compose, Python 3.12 image, Node 20 image |
+| Packaging | Docker Compose, Python 3.12 image, Node 24 image |
 
 ## Deterministic analytics tools
 
@@ -191,7 +255,7 @@ The final three fields are fully replaced with `*`. Aliasing a sensitive databas
 ## Prerequisites
 
 - Python 3.12+ (the backend container uses 3.12)
-- Node.js 20+ and npm
+- Node.js 24+ and npm (the frontend container and CI use Node 24)
 - Microsoft SQL Server with `AdventureWorks2022`
 - Microsoft ODBC Driver 18 for SQL Server on the backend host
 - Ollama running locally or at a reachable URL
@@ -621,6 +685,12 @@ enterprise-ai-agent/
 |-- docker-compose.yml
 `-- README.md
 ```
+
+## Portfolio milestone status
+
+**Status: complete for the current portfolio milestone.** The repository contains the application, safety controls, tests, observability, CI workflow, production-style frontend/backend images, and a full local Docker Compose topology.
+
+Before presenting a live end-to-end demo, configure Auth0 values, restore the organization-provided AdventureWorks/RBAC data, pull the Ollama models, and build the Qdrant collections. These are runtime data prerequisites, not missing application features. See [Docker Compose](#docker-compose) for the exact sequence.
 
 ## Current limitations
 
