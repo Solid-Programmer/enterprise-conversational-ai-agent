@@ -209,7 +209,7 @@ Run commands from the `enterprise-ai-agent` repository root unless a step says o
 
 Restore or attach `AdventureWorks2022`, ensure the 19 expected `Sales` tables are available, create the four `rbac` tables described above, and map each Auth0 `sub` to an active user, role, and table permissions.
 
-The backend selects SQL authentication when both `DB_USER` and `DB_PASSWORD` are non-empty. Otherwise it uses Windows trusted authentication.
+`DB_TRUSTED_CONNECTION=true` selects Windows trusted authentication. Set it to `false` with `DB_USER` and `DB_PASSWORD` for SQL authentication; Docker Compose uses this mode because Linux containers cannot use the host's Windows identity.
 
 ### 2. Configure backend environment variables
 
@@ -304,20 +304,58 @@ Open `http://localhost:3000`. Vite proxies `/api` to `http://127.0.0.1:8000` by 
 
 ## Docker Compose
 
+The root Compose file runs the complete local stack with production-style application containers. The frontend is an nginx-served static build; nginx proxies its existing relative `/api` requests to FastAPI over the internal Compose network.
+
 | Service | Host port | Notes |
 | --- | --- | --- |
-| `frontend` | `3000` | Vite development server; proxies `/api` to `backend:8000` |
-| `backend` | `8000` | FastAPI; reads the root `.env` |
-| `qdrant` | `6333` | Persistent `qdrant_storage` volume |
+| `frontend` | `3000` | nginx production build; proxies `/api` to `backend:8000` |
+| `backend` | `8000` | FastAPI; reads the root `.env` and uses Compose service DNS |
+| `sqlserver` | `1433` | SQL Server 2022 Developer; persistent `sqlserver_data` volume |
+| `qdrant` | `6333` | Persistent `qdrant_data` volume |
 | `phoenix` | `6006` | Persistent `phoenix_data` volume |
+| `ollama` | `11434` | Persistent `ollama_data` model volume |
 
-The backend container overrides service URLs to use `host.docker.internal` for Ollama and Compose DNS names for Qdrant/Phoenix.
+### First startup
 
-```bash
-docker compose up --build
+```powershell
+Copy-Item .env.example .env
 ```
 
-The full command is not turnkey: `backend/Dockerfile` installs UnixODBC development packages but not Microsoft's `msodbcsql18` runtime driver. Add that driver before relying on containerized SQL Server access. SQL Server and Ollama also remain external to this Compose file.
+Set a strong `DB_PASSWORD` and all five Auth0 settings in `.env` (`AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, and the three `VITE_AUTH0_*` variables; the SPA client ID is build-time configuration). Then run:
+
+```bash
+docker compose build
+docker compose up -d
+docker compose ps
+```
+
+`backend` waits for the SQL Server, Qdrant, and Ollama health checks. Runtime model warm-up is intentionally disabled for first startup so an empty Ollama model volume does not slow or fail the API health check. Enable it in `.env` after the models are present if you want process startup warm-up.
+
+### Required manual data initialization
+
+The repository does **not** contain an AdventureWorks `.bak`, a database restore/create script, or RBAC schema/seed migrations. A fresh `sqlserver` container is therefore healthy but has no `AdventureWorks2022` database or `rbac` tables. Restore AdventureWorks and apply your existing RBAC setup using the appropriate organization-owned assets before issuing chat requests; this project deliberately does not recreate the AdventureWorks schema manually. The current non-Docker `.env` points at a host-local/named-instance SQL Server, so its existing database is not copied into `sqlserver_data` automatically.
+
+Ollama models are persisted but are not downloaded automatically:
+
+```bash
+docker compose exec ollama ollama pull qwen2.5:7b
+docker compose exec ollama ollama pull nomic-embed-text
+```
+
+Once Ollama is ready, build the two empty Qdrant collections from the existing indexing modules:
+
+```bash
+docker compose exec backend python -m app.retrieval.index_verified_queries --recreate
+docker compose exec backend python -m app.retrieval.index_semantic_schema --recreate
+```
+
+After loading the database, RBAC records, models, and indexes, restart the backend if you enable startup warm-up:
+
+```bash
+docker compose restart backend
+```
+
+Useful checks are `http://localhost:3000`, `http://localhost:8000/health`, `http://localhost:8000/docs`, `http://localhost:6333/dashboard/`, and `http://localhost:6006`.
 
 After startup, create the Qdrant indexes inside the backend container or against the exposed host services.
 
@@ -397,7 +435,7 @@ Pydantic loads the backend `.env` from the repository root. Variables absent fro
 | `DB_NAME` | `AdventureWorks2022` | SQL Server database |
 | `DB_USER` | `sa` in example | SQL login; used only when both user and password are set |
 | `DB_PASSWORD` | example placeholder | SQL login password; never commit the real value |
-| `DB_TRUSTED_CONNECTION` | `true` | Enables trusted auth when SQL credentials are absent |
+| `DB_TRUSTED_CONNECTION` | `true` locally, `false` in Compose | Selects Windows trusted authentication; set `false` to use `DB_USER`/`DB_PASSWORD` |
 | `DB_TRUST_SERVER_CERTIFICATE` | `true` | Controls ODBC `TrustServerCertificate` |
 | `DB_ENCRYPT` | `false` | Controls ODBC transport encryption; use `false` for the local Windows-auth setup, and `true` with a valid certificate in production |
 | `DB_DRIVER` | `ODBC Driver 18 for SQL Server` | Installed ODBC driver name |

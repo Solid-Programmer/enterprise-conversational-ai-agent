@@ -1,33 +1,95 @@
-version: '3.8'
-
 services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_AUTH0_DOMAIN: ${VITE_AUTH0_DOMAIN:-}
+        VITE_AUTH0_CLIENT_ID: ${VITE_AUTH0_CLIENT_ID:-}
+        VITE_AUTH0_AUDIENCE: ${VITE_AUTH0_AUDIENCE:-}
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - agent_network
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
-    ports:
-      - "8000:8000"
     env_file:
       - .env
     environment:
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
-      - QDRANT_URL=http://qdrant:6333
-      - PHOENIX_ENDPOINT=http://phoenix:6006/v1/traces
+      DB_SERVER: sqlserver
+      DB_PORT: "1433"
+      DB_NAME: ${DB_NAME:-AdventureWorks2022}
+      DB_USER: ${DB_USER:-sa}
+      DB_PASSWORD: ${DB_PASSWORD:?Set a strong DB_PASSWORD in .env before starting Compose.}
+      DB_TRUSTED_CONNECTION: "false"
+      DB_ENCRYPT: "false"
+      DB_TRUST_SERVER_CERTIFICATE: "true"
+      OLLAMA_BASE_URL: http://ollama:11434
+      QDRANT_URL: http://qdrant:6333
+      PHOENIX_ENDPOINT: http://phoenix:6006/v1/traces
+      CORS_ALLOWED_ORIGINS: '["http://localhost:3000"]'
+      WARM_RUNTIME_ON_STARTUP: "false"
+    ports:
+      - "8000:8000"
     depends_on:
-      - qdrant
-      - phoenix
+      sqlserver:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      phoenix:
+        condition: service_started
     healthcheck:
-      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://localhost:8000/health').read()"]
-      interval: 30s
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://localhost:8000/health', timeout=3).read()"]
+      interval: 15s
       timeout: 5s
-      retries: 3
-      start_period: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - agent_network
+    restart: unless-stopped
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${DB_PASSWORD:?Set a strong DB_PASSWORD in .env before starting Compose.}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    networks:
+      - agent_network
+    restart: unless-stopped
 
   qdrant:
     image: qdrant/qdrant:latest
     ports:
       - "6333:6333"
     volumes:
-      - qdrant_storage:/qdrant/storage
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:6333/readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    networks:
+      - agent_network
+    restart: unless-stopped
 
   phoenix:
     image: arizephoenix/phoenix:latest
@@ -37,17 +99,32 @@ services:
       - PHOENIX_WORKING_DIR=/mnt/data
     volumes:
       - phoenix_data:/mnt/data
+    networks:
+      - agent_network
+    restart: unless-stopped
 
-  frontend:
-    build:
-      context: ./frontend
+  ollama:
+    image: ollama/ollama:latest
     ports:
-      - "3000:3000"
-    environment:
-      - VITE_API_PROXY_TARGET=http://backend:8000
-    depends_on:
-      - backend
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    networks:
+      - agent_network
+    restart: unless-stopped
 
 volumes:
-  qdrant_storage:
+  sqlserver_data:
+  qdrant_data:
   phoenix_data:
+  ollama_data:
+
+networks:
+  agent_network:
+    driver: bridge
